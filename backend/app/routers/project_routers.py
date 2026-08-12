@@ -46,8 +46,8 @@ def create_project(
     session: Session = Depends(get_session),
 ) -> Project:
     try:
-        return project_service.create_project(session, data)
-    except project_service.CategoryNotFoundError as exc:
+        return projects_service.create_project(session, data)
+    except projects_service.CategoryNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
@@ -61,12 +61,12 @@ def update_project(
     session: Session = Depends(get_session),
 ) -> Project:
     try:
-        project = project_service.update_project(
+        project = projects_service.update_project(
             session,
             project_id,
             data,
         )
-    except project_service.CategoryNotFoundError as exc:
+    except projects_service.CategoryNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
@@ -89,7 +89,7 @@ def delete_project(
     project_id: UUID,
     session: Session = Depends(get_session),
 ) -> None:
-    deleted = project_service.delete_project(session, project_id)
+    deleted = projects_service.delete_project(session, project_id)
 
     if not deleted:
         raise HTTPException(
