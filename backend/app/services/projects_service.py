@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 from sqlmodel import Session, select
 from uuid import UUID
 
@@ -101,7 +103,8 @@ def _get_categories(
     session: Session,
     category_ids: list[UUID],
 ) -> list[Category]:
-    statement = select(Category).where(Category.id.in_(category_ids))
+    category_id_column = cast(Any, Category.id)
+    statement = select(Category).where(category_id_column.in_(category_ids))
 
     categories = list(session.exec(statement).all())
 
