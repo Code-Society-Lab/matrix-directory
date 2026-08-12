@@ -6,6 +6,8 @@ services:
       POSTGRES_USER: matrix
       POSTGRES_PASSWORD: matrix
       PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U matrix -d matrix_directory"]
       interval: 5s
