@@ -1,0 +1,114 @@
+from sqlmodel import Session, select
+from uuid import UUID
+
+from app.models.category import Category
+from app.models.project import Project
+from app.schemas.project import ProjectCreate, ProjectUpdate
+
+from .errors import CategoryNotFoundError
+
+
+def list_projects(session: Session) -> list[Project]:
+    statement = select(Project)
+    return list(session.exec(statement).all())
+
+
+def get_project(
+    session: Session,
+    project_id: UUID,
+) -> Project | None:
+    return session.get(Project, project_id)
+
+
+def create_project(
+    session: Session,
+    data: ProjectCreate,
+) -> Project:
+    if not data.category_ids:
+        raise ValueError("A project must have at least one category")
+
+    categories = _get_categories(session, data.category_ids)
+
+    project = Project(
+        name=data.name,
+        description=data.description,
+        short_description=data.short_description,
+        repository_url=data.repository_url,
+        website_url=data.website_url,
+        matrix_server_url=data.matrix_server_url,
+        supports_e2ee=data.supports_e2ee,
+        user_id=data.user_id,
+        categories=categories,
+    )
+
+    session.add(project)
+    session.commit()
+    session.refresh(project)
+
+    return project
+
+
+def update_project(
+    session: Session,
+    project_id: UUID,
+    data: ProjectUpdate,
+) -> Project | None:
+    project = session.get(Project, project_id)
+
+    if project is None:
+        return None
+
+    update_data = data.model_dump(
+        exclude_unset=True,
+        exclude={"category_ids"},
+    )
+
+    for field, value in update_data.items():
+        setattr(project, field, value)
+
+    if data.category_ids is not None:
+        if not data.category_ids:
+            raise ValueError("A project must have at least one category")
+
+        project.categories = _get_categories(
+            session,
+            data.category_ids,
+        )
+
+    session.add(project)
+    session.commit()
+    session.refresh(project)
+
+    return project
+
+
+def delete_project(
+    session: Session,
+    project_id: UUID,
+) -> bool:
+    project = session.get(Project, project_id)
+
+    if project is None:
+        return False
+
+    session.delete(project)
+    session.commit()
+
+    return True
+
+
+def _get_categories(
+    session: Session,
+    category_ids: list[UUID],
+) -> list[Category]:
+    statement = select(Category).where(Category.id.in_(category_ids))
+
+    categories = list(session.exec(statement).all())
+
+    if len(categories) != len(set(category_ids)):
+        found_ids = {category.id for category in categories}
+        missing_ids = set(category_ids) - found_ids
+
+        raise CategoryNotFoundError(f"Categories not found: {missing_ids}")
+
+    return categories

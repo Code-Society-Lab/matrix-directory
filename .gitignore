@@ -1,0 +1,12 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+backend/matrix_directory.db
+frontend/node_modules/
+frontend/dist/
+.vscode
+matrix_bot_directory_backend.egg-info
+.mypy_cache
