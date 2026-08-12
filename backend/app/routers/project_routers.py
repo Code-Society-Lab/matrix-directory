@@ -5,7 +5,7 @@ from uuid import UUID
 from app.database import get_session
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
-from app.services import projects as project_service
+from app.services import projects_service
 
 router = APIRouter(
     prefix="/projects",
@@ -17,7 +17,7 @@ router = APIRouter(
 def list_projects(
     session: Session = Depends(get_session),
 ) -> list[Project]:
-    return project_service.list_projects(session)
+    return projects_service.list_projects(session)
 
 
 @router.get("/{project_id}", response_model=ProjectRead)
@@ -25,7 +25,7 @@ def get_project(
     project_id: UUID,
     session: Session = Depends(get_session),
 ) -> Project:
-    project = project_service.get_project(session, project_id)
+    project = projects_service.get_project(session, project_id)
 
     if project is None:
         raise HTTPException(
