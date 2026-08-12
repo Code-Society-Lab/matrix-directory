@@ -78,6 +78,7 @@ def get_or_create_ada(
     )
     project.user_id = owner.id
     project.website_url = "https://codesociety.xyz/"
+    project.matrix_server_url = "https://matrix.to/#/#codesociety:matrix.org"
     project.supports_e2ee = False
     project.categories = categories
 
