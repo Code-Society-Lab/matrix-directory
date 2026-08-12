@@ -77,6 +77,7 @@ def get_or_create_ada(
         "serves as a real-world consumer of the matrix.py framework."
     )
     project.user_id = owner.id
+    project.website_url = "https://codesociety.xyz/"
     project.supports_e2ee = False
     project.categories = categories
 
