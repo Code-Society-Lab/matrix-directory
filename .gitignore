@@ -7,6 +7,11 @@ __pycache__/
 backend/matrix_directory.db
 frontend/node_modules/
 frontend/dist/
+frontend/.env.*
+!frontend/.env.example
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
 .vscode
 matrix_bot_directory_backend.egg-info
 .mypy_cache
