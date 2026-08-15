@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.railpack.com",
+
+  "packages": {
+    "node": "24",
+    "python": "3.13.13"
+  },
+
+  "buildAptPackages": [
+    "git"
+  ],
+
+  "steps": {
+    "install": {
+      "commands": [
+        { "src": ".", "dest": "." },
+        "python3 -m venv .venv",
+        ".venv/bin/pip install --upgrade pip",
+        ".venv/bin/pip install ./backend",
+        "cd frontend && npm ci"
+      ]
+    },
+
+    "build": {
+      "inputs": [
+        { "step": "install" }
+      ],
+      "variables": {
+        "VITE_API_URL": "/api"
+      },
+      "commands": [
+        "cd frontend && npm run build",
+        "mkdir -p backend/static",
+        "cp -R frontend/dist/. backend/static/"
+      ]
+    }
+  },
+
+  "deploy": {
+    "inputs": [
+      {
+        "step": "packages:mise",
+        "include": [
+          "/mise/shims",
+          "/mise/installs"
+        ]
+      },
+      {
+        "step": "build",
+        "include": [
+          ".venv",
+          "backend"
+        ]
+      }
+    ],
+    "startCommand": "cd backend && exec sh start.sh"
+  }
+}
