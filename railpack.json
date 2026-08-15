@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.railpack.com",
+
+  "packages": {
+    "node": "24",
+    "python": "3.13.13"
+  },
+
+  "buildAptPackages": [
+    "git"
+  ],
+
+  "steps": {
+    "install": {
+      "commands": [
+        { "src": ".", "dest": "." },
+        "python3 -m venv .venv",
+        ".venv/bin/pip install --upgrade pip",
+        ".venv/bin/pip install ./backend",
+        "cd frontend && npm ci"
+      ]
+    },
+
+    "build": {
+      "inputs": [
+        { "step": "install" }
+      ],
+      "variables": {
+        "VITE_API_URL": "/api"
+      },
+      "commands": [
+        "cd frontend && npm run build",
+        "mkdir -p backend/static",
+        "cp -R frontend/dist/. backend/static/"
+      ],
+      "deployOutputs": [
+        {
+          "include": [
+            ".venv",
+            "backend"
+          ]
+        }
+      ]
+    }
+  },
+
+  "deploy": {
+    "startCommand": "cd backend && ../.venv/bin/pelican up && ../.venv/bin/python -m app.seed && exec ../.venv/bin/fastapi run app/main.py --host 0.0.0.0 --port ${PORT:-8000}"
+  }
+}
