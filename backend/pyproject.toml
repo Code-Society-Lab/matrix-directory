@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "matrix-bot-directory-backend"
-dynamic = ["version"]
+version = "0.1.0"
 authors = [
     { name = "Chris Dedman" },
     { name = "Simon Roy" }
@@ -13,8 +13,6 @@ maintainers = [
     { name = "Code Society Lab", email = "admin@codesociety.xyz" }
 ]
 description = "Backend for the Matrix Bot Directory"
-readme = "README.md"
-license = { file = "LICENSE" }
 requires-python = ">=3.10"
 
 dependencies = [
