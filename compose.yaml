@@ -20,7 +20,13 @@ services:
     build: ./backend
     environment:
       DATABASE_URL: postgresql+psycopg://matrix:matrix@db:5432/matrix_directory
-      FRONTEND_ORIGIN: http://localhost:5173
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+      APP_SECRET: ${APP_SECRET:-development-only-change-me}
+      MATRIX_OIDC_ISSUER: ${MATRIX_OIDC_ISSUER:-https://account.matrix.org/}
+      MATRIX_OIDC_CLIENT_ID: ${MATRIX_OIDC_CLIENT_ID:-}
+      MATRIX_OIDC_CLIENT_SECRET: ${MATRIX_OIDC_CLIENT_SECRET:-}
+      MATRIX_OIDC_REDIRECT_URI: ${MATRIX_OIDC_REDIRECT_URI:-}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
     command: >
       sh -c "pelican up &&
              python -m app.seed &&
@@ -36,7 +42,9 @@ services:
   frontend:
     build: ./frontend
     environment:
-      VITE_API_URL: http://localhost:8000/api
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+      VITE_API_URL: /api
+      VITE_API_PROXY_TARGET: http://api:8000
     ports:
       - "5173:5173"
     volumes:

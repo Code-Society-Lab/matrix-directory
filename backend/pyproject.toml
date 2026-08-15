@@ -1,9 +1,9 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=84", "wheel>=0.48"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "matrix-bot-directory-backend"
+name = "matrix-directory-backend"
 dynamic = ["version"]
 authors = [
     { name = "Chris Dedman" },
@@ -12,25 +12,28 @@ authors = [
 maintainers = [
     { name = "Code Society Lab", email = "admin@codesociety.xyz" }
 ]
-description = "Backend for the Matrix Bot Directory"
+description = "Backend for the Matrix Directory"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
 
 dependencies = [
-  "fastapi[standard]>=0.116",
+  "fastapi[standard]>=0.141.1",
   "sqlmodel>=0.0.38",
   "sqlmodel-toolkit @ git+https://github.com/Code-Society-Lab/sqlmodel-toolkit.git",
-  "pelican-migration>=0.1.2a0",
-  "psycopg[binary]>=3.2",
-  "pydantic-settings>=2.10",
+  "pelican-migration>=0.1.3a0",
+  "psycopg[binary]>=3.3.4",
+  "pydantic-settings>=2.15.0",
+  "httpx>=0.28.1",
+  "authlib>=1.7.2",
+  "itsdangerous>=2.2.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "black==26.3.1",
-  "pytest==9.0.3",
-  "mypy==1.20.1",
+  "black==26.5.1",
+  "pytest==9.1.1",
+  "mypy==2.3.0",
 ]
 
 [tool.setuptools.packages.find]

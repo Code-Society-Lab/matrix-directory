@@ -89,29 +89,23 @@ def seed() -> None:
     with Session(engine) as session:
         owner = get_or_create_user(
             session,
-            matrix_id="@codesocietylab:matrix.org",
-        )
-
-        bot_category = get_or_create_category(
-            session,
-            name="Bots",
+            matrix_id="@penguinboi:matrix.org",
         )
 
         development_category = get_or_create_category(
             session,
-            name="Development",
+            name="Dev tools",
         )
 
         utilities_category = get_or_create_category(
             session,
-            name="Utilities",
+            name="Utility",
         )
 
         get_or_create_ada(
             session,
             owner=owner,
             categories=[
-                bot_category,
                 development_category,
                 utilities_category,
             ],
