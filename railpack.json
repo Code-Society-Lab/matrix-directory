@@ -53,6 +53,6 @@
         ]
       }
     ],
-    "startCommand": "cd backend && ../.venv/bin/pelican up && ../.venv/bin/python -m app.seed && exec ../.venv/bin/fastapi run app/main.py --host 0.0.0.0 --port ${PORT:-8000}"
+    "startCommand": "cd backend && exec sh start.sh"
   }
 }
