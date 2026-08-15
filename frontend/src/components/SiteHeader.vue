@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+
+import { currentUser, logout } from '../auth'
+
+const router = useRouter()
+
+async function signOut() {
+  await logout()
+  await router.push('/')
+}
 </script>
 
 <template>
@@ -9,15 +18,47 @@ import { RouterLink } from 'vue-router'
         to="/"
         class="text-sm font-semibold tracking-tight text-zinc-950"
       >
-        Matrix Bot Directory
+        Matrix Directory
       </RouterLink>
 
       <nav class="flex items-center gap-4 text-sm text-zinc-600">
         <RouterLink
           to="/"
-          class="rounded-md border border-zinc-300 bg-white px-3 py-1.5 font-medium text-zinc-800 hover:bg-zinc-50"
+          class="font-medium text-zinc-800 hover:text-zinc-950"
         >
           Browse
+        </RouterLink>
+        <RouterLink
+          to="#"
+          class="font-medium text-zinc-800 hover:text-zinc-950"
+          disabled
+          title="Coming soon"
+        >
+          Docs
+        </RouterLink>
+        <RouterLink
+          v-if="currentUser"
+          to="/dashboard"
+          class="font-medium text-zinc-800 hover:text-zinc-950"
+        >
+          {{ currentUser.matrix_id ?? 'Dashboard' }}
+        </RouterLink>
+
+        <div class="h-5 w-px bg-zinc-300" />
+
+        <button
+          v-if="currentUser"
+          class="auth-button"
+          @click="signOut"
+        >
+          Sign out
+        </button>
+        <RouterLink
+          v-else
+          to="/login"
+          class="auth-button"
+        >
+          Sign in
         </RouterLink>
       </nav>
     </div>
