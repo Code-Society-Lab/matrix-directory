@@ -32,19 +32,27 @@
         "cd frontend && npm run build",
         "mkdir -p backend/static",
         "cp -R frontend/dist/. backend/static/"
-      ],
-      "deployOutputs": [
-        {
-          "include": [
-            ".venv",
-            "backend"
-          ]
-        }
       ]
     }
   },
 
   "deploy": {
+    "inputs": [
+      {
+        "step": "packages:mise",
+        "include": [
+          "/mise/shims",
+          "/mise/installs"
+        ]
+      },
+      {
+        "step": "build",
+        "include": [
+          ".venv",
+          "backend"
+        ]
+      }
+    ],
     "startCommand": "cd backend && ../.venv/bin/pelican up && ../.venv/bin/python -m app.seed && exec ../.venv/bin/fastapi run app/main.py --host 0.0.0.0 --port ${PORT:-8000}"
   }
 }
