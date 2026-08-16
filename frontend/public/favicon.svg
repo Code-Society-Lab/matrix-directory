@@ -1,12 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <g fill="none"
-     stroke="currentColor"
-     stroke-linecap="round"
-     stroke-linejoin="round">
-    <path d="M15 8H7V56H15" stroke-width="4"/>
-    <path d="M49 8H57V56H49" stroke-width="4"/>
-    <path d="M19 45V24L32 40L45 24V45" stroke-width="4.5"/>
-  </g>
-  <circle cx="32" cy="16" r="2.8" fill="currentColor"/>
-  <circle cx="32" cy="22.5" r="2.8" fill="currentColor"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path stroke-width="4" d="M15 8H7v48h8M49 8h8v48h-8"/><path stroke-width="4.5" d="M19 45V24l13 16 13-16v21"/></g><circle cx="32" cy="16" r="2.8" fill="currentColor"/><circle cx="32" cy="22.5" r="2.8" fill="currentColor"/></svg>
