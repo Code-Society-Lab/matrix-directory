@@ -3,6 +3,13 @@ export type Category = {
   name: string
 }
 
+export type ProjectOwner = {
+  id: string
+  display_name: string | null
+  matrix_id: string | null
+  avatar_url: string | null
+}
+
 export type ProjectListItem = {
   id: string
   name: string
@@ -14,6 +21,7 @@ export type ProjectListItem = {
   supports_e2ee: boolean
   user_id: string
   categories: Category[]
+  owner: ProjectOwner
 }
 
 export type Project = ProjectListItem
