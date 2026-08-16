@@ -10,6 +10,7 @@ ADA_REPOSITORY_URL = "https://github.com/Code-Society-Lab/ada"
 
 SEED_OIDC_ISSUER = "seed://matrix-directory"
 SEED_OIDC_SUBJECT = "penguinboi"
+SEED_MATRIX_ID = "@penguinboi:matrix.org"
 
 
 def get_or_create_user(
@@ -17,6 +18,7 @@ def get_or_create_user(
     *,
     oidc_issuer: str,
     oidc_subject: str,
+    matrix_id: str | None = None,
 ) -> User:
     user = session.exec(
         select(User).where(
@@ -27,6 +29,19 @@ def get_or_create_user(
 
     if user is not None:
         return user
+
+    # Profiles created by the profile migration belong to the original user,
+    # whose OIDC fields may still be null. Reuse that user instead of creating
+    # a second account that would collide with the unique Matrix ID.
+    if matrix_id is not None:
+        profile = session.exec(
+            select(Profile).where(Profile.matrix_id == matrix_id)
+        ).first()
+
+        if profile is not None:
+            existing_user = session.get(User, profile.user_id)
+            if existing_user is not None:
+                return existing_user
 
     user = User(
         oidc_issuer=oidc_issuer,
@@ -129,12 +144,13 @@ def seed() -> None:
             session,
             oidc_issuer=SEED_OIDC_ISSUER,
             oidc_subject=SEED_OIDC_SUBJECT,
+            matrix_id=SEED_MATRIX_ID,
         )
 
         get_or_create_profile(
             session,
             user=owner,
-            matrix_id="@penguinboi:matrix.org",
+            matrix_id=SEED_MATRIX_ID,
             display_name="PenguinBoi",
         )
 
