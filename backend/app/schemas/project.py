@@ -14,8 +14,6 @@ class ProjectCreate(BaseModel):
     website_url: str | None = None
     matrix_server_url: str | None = None
 
-    user_id: UUID
-
     supports_e2ee: bool = False
 
     category_ids: list[UUID]

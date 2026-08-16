@@ -15,6 +15,11 @@ def list_projects(session: Session) -> list[Project]:
     return list(session.exec(statement).all())
 
 
+def list_projects_for_user(session: Session, *, user_id: UUID) -> list[Project]:
+    statement = select(Project).where(Project.user_id == user_id)
+    return list(session.exec(statement).all())
+
+
 def get_project(
     session: Session,
     project_id: UUID,
@@ -25,6 +30,8 @@ def get_project(
 def create_project(
     session: Session,
     data: ProjectCreate,
+    *,
+    user_id: UUID,
 ) -> Project:
     if not data.category_ids:
         raise ValueError("A project must have at least one category")
@@ -39,7 +46,7 @@ def create_project(
         website_url=data.website_url,
         matrix_server_url=data.matrix_server_url,
         supports_e2ee=data.supports_e2ee,
-        user_id=data.user_id,
+        user_id=user_id,
         categories=categories,
     )
 
@@ -54,8 +61,10 @@ def update_project(
     session: Session,
     project_id: UUID,
     data: ProjectUpdate,
+    *,
+    user_id: UUID,
 ) -> Project | None:
-    project = session.get(Project, project_id)
+    project = _get_owned_project(session, project_id, user_id)
 
     if project is None:
         return None
@@ -87,8 +96,10 @@ def update_project(
 def delete_project(
     session: Session,
     project_id: UUID,
+    *,
+    user_id: UUID,
 ) -> bool:
-    project = session.get(Project, project_id)
+    project = _get_owned_project(session, project_id, user_id)
 
     if project is None:
         return False
@@ -97,6 +108,14 @@ def delete_project(
     session.commit()
 
     return True
+
+
+def _get_owned_project(
+    session: Session, project_id: UUID, user_id: UUID
+) -> Project | None:
+    return session.exec(
+        select(Project).where(Project.id == project_id, Project.user_id == user_id)
+    ).first()
 
 
 def _get_categories(

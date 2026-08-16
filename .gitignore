@@ -13,5 +13,5 @@ frontend/*.tsbuildinfo
 frontend/vite.config.js
 frontend/vite.config.d.ts
 .vscode
-matrix_bot_directory_backend.egg-info
+matrix_directory_backend.egg-info
 .mypy_cache
