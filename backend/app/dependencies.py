@@ -15,12 +15,17 @@ def get_current_user(
 ) -> User:
     """Get the currently authenticated user based on the session token cookie."""
 
-    if session_token is not None:
-        user = get_user_for_token(session, token=session_token)
-        if user is not None:
-            return user
+    if session_token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
 
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Authentication required",
-    )
+    user = get_user_for_token(session, token=session_token)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+
+    return user
