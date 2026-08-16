@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
+
 import { listProjects } from '../api/client'
 import BotCard from '../components/BotCard.vue'
 import type { ProjectListItem } from '../types/project'
 
 const projects = ref<ProjectListItem[]>([])
+const botCount = computed(() => projects.value.length)
 const query = ref('')
 const category = ref('')
 const loading = ref(true)
@@ -43,14 +46,15 @@ onMounted(loadProjects)
 <template>
   <main class="mx-auto max-w-6xl px-5 py-10">
     <section class="max-w-2xl">
-      <p class="text-sm font-medium text-zinc-500 tracking-wide uppercase">
-        Matrix ecosystem
+      <p class="flex items-center text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+        Open directory · {{ botCount }} {{ botCount === 1 ? 'bot' : 'bots' }}
       </p>
-      <h1 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-        Find bots built for Matrix.
+      <h1 class="mt-3 text-4xl font-semibold leading-[1.15] tracking-[-0.035em] text-zinc-950">
+        Find a bot for your Matrix room.
       </h1>
-      <p class="mt-3 text-base leading-7 text-zinc-600">
-        A small, community-oriented registry for discovering Matrix bots.
+      <p class="mt-3 max-w-xl text-[15px] leading-6 text-zinc-500">
+        Discover bridges, moderation tools, games, and assistants listed by the
+        people who build them.
       </p>
     </section>
 
@@ -70,7 +74,7 @@ onMounted(loadProjects)
           <span class="sr-only">Category</span>
           <select
             v-model="category"
-            class="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-700 outline-none focus:border-zinc-500 sm:w-48"
+            class="w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-700 outline-none focus:border-zinc-500 sm:w-48"
           >
             <option value="">All categories</option>
             <option
@@ -98,13 +102,48 @@ onMounted(loadProjects)
 
       <div
         v-else-if="visibleProjects.length"
-        class="mt-6 grid gap-4 md:grid-cols-2"
+        class="mt-10"
       >
-        <BotCard
-          v-for="project in visibleProjects"
-          :key="project.id"
-          :project="project"
-        />
+        <!-- Section heading -->
+        <div class="flex items-center justify-between border-b border-zinc-200 pb-4">
+          <h3 class="text-lg font-semibold tracking-tight text-zinc-950">
+            Most used
+          </h3>
+
+          <span class="font-mono text-[11px] text-zinc-400">
+            ranked by rooms running it
+          </span>
+        </div>
+
+        <!-- Cards -->
+        <section
+          class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3"
+        >
+          <BotCard
+            v-for="project in visibleProjects"
+            :key="project.id"
+            :project="project"
+          />
+        </section>
+
+        <div class="flex items-center justify-between border-b border-zinc-200 pb-4 pt-12">
+          <h3 class="text-lg font-semibold tracking-tight text-zinc-950">
+            Recently added
+          </h3>
+
+          <span class="font-mono text-[11px] text-zinc-400">
+            newest listings first
+          </span>
+        </div>
+
+        <!-- Cards -->
+        <section
+          class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3"
+        >
+          <p class="text-sm text-red-500">
+            <ExclamationTriangleIcon class="mr-2 inline-block size-5" /> Coming soon...
+          </p>
+        </section>
       </div>
 
       <div

@@ -61,14 +61,20 @@ async def complete_matrix_login(
         subject = token["userinfo"]["sub"]
     except (KeyError, OAuthError):
         query = urlencode({"error": "Matrix login failed. Please try again."})
-        return RedirectResponse(f"{settings.frontend_origin}/login?{query}")
+        return RedirectResponse(
+            f"{settings.frontend_origin}/login?{query}",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
     session_token = auth_service.create_session(
         session,
         issuer=settings.matrix_oidc_issuer,
         subject=subject,
     )
-    response = RedirectResponse(f"{settings.frontend_origin}/dashboard")
+    response = RedirectResponse(
+        f"{settings.frontend_origin}/dashboard",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
     response.set_cookie(
         auth_service.SESSION_COOKIE,
         session_token,

@@ -1,5 +1,5 @@
 {
-  "name": "matrix-bot-directory-frontend",
+  "name": "matrix-directory-frontend",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -12,6 +12,7 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
+    "@heroicons/vue": "^2.2.0",
     "vue": "^3.5.0",
     "vue-router": "^4.5.0"
   },

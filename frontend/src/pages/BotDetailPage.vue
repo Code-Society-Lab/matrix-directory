@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { ChevronRightIcon, CheckBadgeIcon } from "@heroicons/vue/24/outline";
+
 import { getProject } from '../api/client'
 import type { Project } from '../types/project'
 
 const route = useRoute()
+
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const error = ref('')
@@ -12,10 +15,12 @@ const error = ref('')
 async function loadProject() {
   loading.value = true
   error.value = ''
+
   try {
     project.value = await getProject(String(route.params.id))
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Could not load this bot.'
+    error.value =
+      err instanceof Error ? err.message : 'Could not load this bot.'
   } finally {
     loading.value = false
   }
@@ -26,114 +31,218 @@ onMounted(loadProject)
 </script>
 
 <template>
-  <main class="mx-auto max-w-5xl px-5 py-10">
+  <main class="mx-auto w-full max-w-6xl px-6 py-10 sm:px-8 lg:py-12">
+    <!-- Loading -->
     <div
       v-if="loading"
-      class="text-sm text-zinc-500"
+      class="py-20 text-sm text-zinc-500"
     >
       Loading bot…
     </div>
+
+    <!-- Error -->
     <div
       v-else-if="error"
-      class="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+      class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
     >
       {{ error }}
     </div>
 
+    <!-- Project -->
     <template v-else-if="project">
-      <div class="border-b border-zinc-200 pb-8">
-        <div class="flex flex-wrap items-start justify-between gap-6">
-          <div class="max-w-2xl">
-            <h1 class="text-3xl font-semibold tracking-tight text-zinc-950">
+      <!-- Breadcrumb -->
+      <nav class="mb-8 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em]">
+        <RouterLink
+          to="/"
+          class="text-emerald-600 transition hover:text-emerald-700"
+        >
+          Open directory
+        </RouterLink>
+
+        <span class="text-zinc-400">
+          <ChevronRightIcon class="size-3" />
+        </span>
+
+        <RouterLink
+          to="/"
+          class="text-emerald-600 transition hover:text-emerald-700"
+        >
+          Bots
+        </RouterLink>
+
+        <span class="text-zinc-400">
+          <ChevronRightIcon class="size-3" />
+        </span>
+
+        <span class="text-zinc-500">
+          {{ project.name }}
+        </span>
+      </nav>
+
+      <!-- Hero -->
+      <section class="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+        <div class="max-w-3xl">
+          <!-- Name -->
+          <div class="flex items-center gap-4">
+            <h1 class="text-5xl font-semibold tracking-tight text-zinc-950 sm:text-6xl">
               {{ project.name }}
             </h1>
-            <p class="mt-3 text-base leading-7 text-zinc-600">
-              {{ project.short_description }}
-            </p>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <span
-                v-for="category in project.categories"
-                :key="category.id"
-                class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs text-zinc-600"
-              >
-                {{ category.name }}
-              </span>
-            </div>
+
+            <!-- Verified badge 
+             TODO: connect some verified mechanism when available -->
+            <span
+              class="flex items-center justify-center rounded-full bg-emerald-600 text-white"
+              title="Verified"
+            >
+              <CheckBadgeIcon class="size-7" />
+            </span>
           </div>
 
-          <a
-            v-if="project.repository_url"
-            :href="project.repository_url"
-            target="_blank"
-            rel="noreferrer"
-            class="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
-          >
-            View repository
-          </a>
+          <!-- Description -->
+          <p class="mt-4 text-lg leading-8 text-zinc-500">
+            {{ project.short_description }}
+          </p>
+
+          <!-- Categories -->
+          <div class="mt-5 flex flex-wrap gap-2">
+            <span
+              v-for="category in project.categories"
+              :key="category.id"
+              class="rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-sm text-zinc-500 shadow-sm"
+            >
+              {{ category.name }}
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div class="grid gap-10 py-8 md:grid-cols-[minmax(0,1fr)_260px]">
-        <section>
-          <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500">
-            About
-          </h2>
-          <p class="mt-3 whitespace-pre-line text-sm leading-7 text-zinc-700">
-            {{ project.description }}
-          </p>
+        <!-- Invite to room button -->
+        <button
+          target="_blank"
+          rel="noreferrer"
+          class="inline-flex shrink-0 items-center justify-center cursor-pointer rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+          disabled
+          title="Coming soon"
+        >
+          Invite to my room
+        </button>
+      </section>
 
-          <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-zinc-500">
-            Matrix server
-          </h2>
-          <a
-            v-if="project.matrix_server_url"
-            :href="project.matrix_server_url"
-            target="_blank"
-            rel="noreferrer"
-            class="mt-3 block break-all text-sm text-blue-600 underline"
-          >
-            {{ project.matrix_server_url }}
-          </a>
-          <p
-            v-else
-            class="mt-3 text-sm text-zinc-700"
-          >
-            Not listed
-          </p>
+      <!-- Details -->
+      <div class="mt-12 grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
+        <!-- Left card -->
+        <section class="rounded-2xl border border-zinc-200 bg-white p-8 sm:p-9">
+          <!-- About -->
+          <div>
+            <h2 class="text-xl font-semibold tracking-tight text-zinc-950">
+              About
+            </h2>
+
+            <p class="mt-4 whitespace-pre-line text-base leading-8 text-zinc-600">
+              {{ project.description }}
+            </p>
+          </div>
+
+          <div class="my-8 border-t border-zinc-200" />
+
+          <!-- Matrix server -->
+          <div>
+            <h2 class="text-lg font-semibold text-zinc-950">
+              Matrix server
+            </h2>
+
+            <a
+              v-if="project.matrix_server_url"
+              :href="project.matrix_server_url"
+              target="_blank"
+              rel="noreferrer"
+              class="mt-3 block break-all text-base text-blue-600 underline decoration-blue-300 underline-offset-2 transition hover:text-blue-700"
+            >
+              {{ project.matrix_server_url }}
+            </a>
+
+            <p
+              v-else
+              class="mt-3 text-base text-zinc-500"
+            >
+              Not listed
+            </p>
+          </div>
         </section>
 
-        <aside class="space-y-5 text-sm">
+        <!-- Right card -->
+        <aside class="rounded-2xl border border-zinc-200 bg-white p-8 sm:p-9">
+          <!-- Website -->
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <p class="text-sm font-medium text-zinc-500">
               Website
             </p>
+
             <a
               v-if="project.website_url"
               :href="project.website_url"
               target="_blank"
               rel="noreferrer"
-              class="mt-1 block break-all text-zinc-800 underline"
-            >{{ project.website_url }}</a>
+              class="mt-2 block break-all text-base text-zinc-900 underline decoration-zinc-400 underline-offset-2 transition hover:text-emerald-700"
+            >
+              {{ project.website_url }}
+            </a>
+
             <p
               v-else
-              class="mt-1 text-zinc-800"
+              class="mt-2 text-base text-zinc-900"
             >
               Not listed
             </p>
           </div>
+
+          <div class="my-8 border-t border-zinc-200" />
+
+          <!-- Bot Repository -->
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <p class="text-sm font-medium text-zinc-500">
+              Repository
+            </p>
+
+            <a
+              v-if="project.repository_url"
+              :href="project.repository_url"
+              target="_blank"
+              rel="noreferrer"
+              class="mt-2 block break-all text-base text-zinc-900 underline decoration-zinc-400 underline-offset-2 transition hover:text-emerald-700"
+            >
+              {{ project.repository_url }}
+            </a>
+
+            <p
+              v-else
+              class="mt-2 text-base text-zinc-900"
+            >
+              Not listed
+            </p>
+          </div>
+
+          <div class="my-8 border-t border-zinc-200" />
+
+          <!-- Owner -->
+          <div>
+            <p class="text-sm font-medium text-zinc-500">
               Owner
             </p>
-            <p class="mt-1 break-all text-zinc-800">
+
+            <p class="mt-2 break-all text-base leading-6 text-zinc-900">
               {{ project.user_id }}
             </p>
           </div>
+
+          <div class="my-8 border-t border-zinc-200" />
+
+          <!-- E2EE -->
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <p class="text-sm font-medium text-zinc-500">
               E2EE
             </p>
-            <p class="mt-1 text-zinc-800">
+
+            <p class="mt-2 text-base text-zinc-900">
               {{ project.supports_e2ee ? 'Supported' : 'Not Supported' }}
             </p>
           </div>
