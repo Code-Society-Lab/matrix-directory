@@ -13,8 +13,8 @@ maintainers = [
     { name = "Code Society Lab", email = "admin@codesociety.xyz" }
 ]
 description = "Backend for the Matrix Directory"
-readme = "README.md"
-license = { file = "LICENSE" }
+readme = { text = "Backend for the Matrix Directory.", content-type = "text/markdown" }
+license = "MIT"
 requires-python = ">=3.10"
 
 dependencies = [

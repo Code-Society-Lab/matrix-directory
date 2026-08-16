@@ -1,67 +1,59 @@
-# Matrix Directory
+<div align="center">
+  <img
+    src="frontend/src/assets/matrix-directory-mark.svg"
+    alt="Matrix Directory"
+    width="120"
+  />
 
-Matrix directory is a web application for discovering and managing Matrix ecosystems (bots, frameworks, SDKs, etc). It provides a frontend for users to browse and interact with projects, and a backend API for managing project data.
+  <h1>Matrix Directory</h1>
 
-## Run
+  <p>
+    <em>A community directory for bots, frameworks, SDKs, and tools in the Matrix ecosystem.</em>
+  </p>
+</div>
+
+<div align="center">
+
+[![Join Matrix](https://img.shields.io/matrix/codesociety%3Amatrix.org?logo=matrix&label=%20&labelColor=%23202020&color=%23202020)](https://matrix.to/#/%23codesociety:matrix.org)
+[![CodeQL Advanced](https://github.com/Code-Society-Lab/matrix-directory/actions/workflows/codeql.yml/badge.svg)](https://github.com/Code-Society-Lab/matrix-directory/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Code-Society-Lab/matrix-directory/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Code-Society-Lab/matrix-directory)
+
+</div>
+
+Matrix Directory is a community-driven web application for discovering projects
+in the Matrix ecosystem, including bots, frameworks, SDKs, and other tools.
+
+It provides a Vue frontend for discovering and managing listings and a FastAPI
+backend for authentication, profiles, project ownership, and directory data.
+
+## Tech stack
+
+- **Frontend:** Vue 3, TypeScript, Tailwind CSS
+- **Backend:** FastAPI, SQLModel
+- **Database:** PostgreSQL
+- **Migrations:** Pelican
+- **Authentication:** Matrix Authentication Service / OpenID Connect
+- **Development:** Docker Compose
+
+## Development
+
+### Requirements
+
+- Docker with Docker Compose
+- [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) only when testing Matrix login locally
+
+Start the application with Docker Compose:
 
 ```bash
 docker compose up --build
 ```
 
-- http://localhost:5173 — frontend
-- http://localhost:8000/docs — API docs
+The services will be available at:
 
-The API runs migrations and seeds the database with [Ada](https://github.com/Code-Society-Lab/ada).
+- [Frontend](http://localhost:5173)
+- [API documentation](http://localhost:8000/docs)
 
-## Matrix login
-
-The directory signs users in through the Matrix Authentication Service (MAS). The
-first version uses `account.matrix.org` and requests only the OpenID Connect
-`openid` scope—never Matrix API access.
-
-`account.matrix.org` rejects localhost and non-HTTPS OAuth URLs. For local
-development, expose the frontend through a temporary HTTPS tunnel. Its `/api`
-requests are proxied to the backend:
-
-```bash
-cloudflared tunnel --url http://localhost:5173
-```
-
-Copy the generated `https://….trycloudflare.com` URL, then register it:
-
-```bash
-curl https://account.matrix.org/oauth2/registration \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "client_name": "Matrix Directory",
-    "client_uri": "https://newer-linux-distributor-brief.trycloudflare.com",
-    "redirect_uris": ["https://newer-linux-distributor-brief.trycloudflare.com/api/auth/matrix/callback"],
-    "grant_types": ["authorization_code"],
-    "response_types": ["code"],
-    "token_endpoint_auth_method": "client_secret_basic"
-  }'
-```
-
-Copy `.env.example` to `.env`, then set `MATRIX_OIDC_CLIENT_ID` and
-`MATRIX_OIDC_CLIENT_SECRET` from that response. Set `MATRIX_OIDC_REDIRECT_URI` to
-the same tunnel URL plus `/api/auth/matrix/callback`, set `FRONTEND_ORIGIN` to the
-tunnel URL, set `SESSION_COOKIE_SECURE=true`, and replace `APP_SECRET` with a long
-random value. Restart the application and use the tunnel URL—not localhost—to sign
-in.
-
-Quick Tunnel URLs change when restarted, requiring a new client registration. A
-stable HTTPS domain or named tunnel avoids that in production.
-
-MAS returns an opaque account identifier, not the user's full Matrix ID. The app
-therefore keys accounts by the secure `(issuer, subject)` pair; a public Matrix ID
-can be added to the profile separately. In production, register HTTPS URLs, set
-`SESSION_COOKIE_SECURE=true`, and store both secrets in a secret manager.
-
-For quick local testing, a script is provided to register a client and start a tunnel:
-
-```bash
-python scripts/dev_matrix_tunnel.py
-```
+The backend automatically applies database migrations on startup.
 
 Stop the services:
 
@@ -75,15 +67,40 @@ Reset the local database:
 docker compose down -v
 ```
 
+## Authentication
+
+Matrix Directory authenticates users through the Matrix Authentication Service
+(MAS) using OpenID Connect.
+
+Application accounts are identified by the OIDC `(issuer, subject)` pair rather
+than by a Matrix ID.
+
+For local development with a real Matrix account, use the helper script to
+register an OAuth client and start an HTTPS tunnel:
+
+```bash
+python scripts/dev_matrix_tunnel.py
+```
+
+See [Authentication Architecture](docs/architecture/authentication.md) for details about identity, sessions, and authorization.
+
 ## API
+
+Interactive API documentation is available at:
+
+- [Swagger UI](http://localhost:8000/docs)
+
+Core endpoints include:
 
 ```text
 GET  /api/health
 GET  /api/projects/
+GET  /api/projects/mine/
 GET  /api/projects/{project_id}
 POST /api/projects/
 PATCH /api/projects/{project_id}
 DELETE /api/projects/{project_id}
+
 GET  /api/auth/matrix/login
 GET  /api/auth/matrix/callback
 GET  /api/auth/me
@@ -92,8 +109,8 @@ POST /api/auth/logout
 
 Project IDs are UUIDs.
 
-Project creation, updates, and deletion require a verified session. Ownership is
-derived from that session; callers can no longer choose a project `user_id`.
+Project creation, updates, and deletion require an authenticated session.
+Ownership is derived from that session; callers cannot choose a project `user_id`.
 
 ## Migrations
 
@@ -106,3 +123,18 @@ pelican status
 pelican up
 pelican down
 ```
+
+## Contributing
+
+We welcome everyone to contribute! Whether it's fixing bugs, suggesting features, or improving the docs. Every bit helps.
+
+- [Submit an issue](https://github.com/Code-Society-Lab/matrix-directory/issues)
+- [Open a pull request](https://github.com/Code-Society-Lab/matrix-directory/blob/main/CONTRIBUTING.md)
+- Hop into our [Matrix](https://matrix.to/#/%23codesociety:matrix.org)
+  or [Discord](https://discord.gg/code-society-823178343943897088) and say hi!
+
+Please read the [CONTRIBUTING.md](./CONTRIBUTING.md) and follow the [code of conduct](./CODE_OF_CONDUCT.md).
+
+## License
+
+Released under the [MIT License](https://github.com/Code-Society-Lab/matrix-directory/blob/main/LICENSE).
