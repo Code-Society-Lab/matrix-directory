@@ -25,7 +25,7 @@ def test_oidc_identity_creates_local_session() -> None:
         user = get_user_for_token(session, token=token)
         assert user is not None
         assert user.oidc_subject == "opaque-subject"
-        assert user.matrix_id is None
+        assert user.profile is None
 
 
 def test_same_oidc_identity_reuses_local_user() -> None:

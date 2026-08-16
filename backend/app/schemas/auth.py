@@ -1,8 +1,12 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+
+from .profile import ProfileRead
 
 
 class CurrentUserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
-    matrix_id: str | None
+    profile: ProfileRead | None
