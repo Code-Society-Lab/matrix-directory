@@ -1,12 +1,13 @@
-from typing import TYPE_CHECKING
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Optional
+from uuid import UUID, uuid4
 
 from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, Relationship
 from sqlmodel_toolkit import Model
-from uuid import UUID, uuid4
 
 if TYPE_CHECKING:
+    from .profile import Profile
     from .project import Project
 
 
@@ -15,18 +16,33 @@ def utc_now() -> datetime:
 
 
 class User(Model, table=True):
-    """A user that can own projects."""
+    """Authenticated user account."""
 
     __tablename__ = "users"
-    __table_args__ = (UniqueConstraint("oidc_issuer", "oidc_subject"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "oidc_issuer",
+            "oidc_subject",
+            name="uq_users_oidc_identity",
+        ),
+    )
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
 
-    matrix_id: str | None = Field(default=None, unique=True, index=True)
-    oidc_issuer: str | None = Field(default=None, max_length=255)
-    oidc_subject: str | None = Field(default=None, max_length=255)
+    oidc_issuer: str = Field(max_length=255)
+    oidc_subject: str = Field(max_length=255)
 
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 
-    projects: list["Project"] = Relationship(back_populates="owner")
+    profile: Optional["Profile"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={
+            "uselist": False,
+            "cascade": "all, delete-orphan",
+        },
+    )
+
+    projects: list["Project"] = Relationship(
+        back_populates="owner",
+    )

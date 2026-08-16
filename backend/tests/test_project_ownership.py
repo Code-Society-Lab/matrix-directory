@@ -17,8 +17,8 @@ def test_project_writes_are_limited_to_owner() -> None:
     SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:
-        owner = User(matrix_id="@owner:example.org")
-        stranger = User(matrix_id="@stranger:example.org")
+        owner = User(oidc_issuer="issuer", oidc_subject="owner")
+        stranger = User(oidc_issuer="issuer", oidc_subject="stranger")
         category = Category(name="Bots")
         session.add_all([owner, stranger, category])
         session.flush()
