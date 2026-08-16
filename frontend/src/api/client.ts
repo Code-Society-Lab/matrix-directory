@@ -1,8 +1,27 @@
 import type { Project, ProjectListItem } from '../types/project'
 
+interface Profile {
+  matrix_id: string | null
+  matrix_id_verified: boolean
+  display_name: string | null
+  bio: string | null
+  avatar_url: string | null
+  github_url: string | null
+  website_url: string | null
+}
+
 export interface CurrentUser {
   id: string
+  profile: Profile | null
+}
+
+export interface ProfileUpdate {
   matrix_id: string | null
+  display_name: string | null
+  bio: string | null
+  avatar_url: string | null
+  github_url: string | null
+  website_url: string | null
 }
 
 const API_URL = import.meta.env.VITE_API_URL ?? '/api'
@@ -41,8 +60,17 @@ export function getCurrentUser() {
   return request<CurrentUser>('/auth/me')
 }
 
+export function updateMyProfile(profile: ProfileUpdate) {
+  return request<Profile>('/profile/me', {
+    method: 'PUT',
+    body: JSON.stringify(profile),
+  })
+}
+
 export function logout() {
-  return request<void>('/auth/logout', { method: 'POST' })
+  return request<void>('/auth/logout', {
+    method: 'POST',
+  })
 }
 
 export function listMyProjects() {
@@ -50,5 +78,7 @@ export function listMyProjects() {
 }
 
 export function deleteProject(id: string) {
-  return request<void>(`/projects/${id}`, { method: 'DELETE' })
+  return request<void>(`/projects/${id}`, {
+    method: 'DELETE',
+  })
 }

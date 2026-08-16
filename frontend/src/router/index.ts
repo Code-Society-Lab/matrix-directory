@@ -4,6 +4,7 @@ import BotDetailPage from '../pages/BotDetailPage.vue'
 import HomePage from '../pages/HomePage.vue'
 import LoginPage from '../pages/LoginPage.vue'
 import DashboardPage from '../pages/DashboardPage.vue'
+import ProfilePage from '../pages/ProfilePage.vue'
 import { authLoaded, currentUser, loadCurrentUser } from '../auth'
 
 export const router = createRouter({
@@ -12,6 +13,11 @@ export const router = createRouter({
     { path: '/', component: HomePage },
     { path: '/bots/:id', component: BotDetailPage },
     { path: '/login', component: LoginPage },
+    {
+      path: '/profile',
+      component: ProfilePage,
+      meta: { requiresAuth: true },
+    },
     { path: '/dashboard', component: DashboardPage, meta: { requiresAuth: true } },
   ],
   scrollBehavior: () => ({ top: 0 }),
