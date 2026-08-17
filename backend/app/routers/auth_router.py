@@ -1,3 +1,4 @@
+from typing import cast
 from urllib.parse import urlencode
 
 from authlib.integrations.base_client.errors import OAuthError  # type: ignore[import-untyped]
@@ -46,7 +47,7 @@ async def start_matrix_login(request: Request) -> Response:
     callback = settings.matrix_oidc_redirect_uri or request.url_for(
         "complete_matrix_login"
     )
-    return await client.authorize_redirect(request, callback)
+    return cast(Response, await client.authorize_redirect(request, callback))
 
 
 @router.get("/matrix/callback")
