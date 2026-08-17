@@ -18,3 +18,4 @@ frontend/vite.config.d.ts
 .vscode
 matrix_directory_backend.egg-info
 .mypy_cache
+docs/site

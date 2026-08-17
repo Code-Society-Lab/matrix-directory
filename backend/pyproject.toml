@@ -36,6 +36,10 @@ dev = [
   "pytest-cov==7.1.0",
   "mypy==2.3.0",
 ]
+docs = [
+  "mkdocs==1.6.1",
+  "mkdocs-material==9.7.6",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]

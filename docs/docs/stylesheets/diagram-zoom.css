@@ -1,0 +1,96 @@
+.mermaid[data-zoomable] {
+  position: relative;
+  cursor: zoom-in;
+}
+
+.mermaid[data-zoomable]:focus-visible {
+  outline: 0.15rem solid var(--md-accent-fg-color);
+  outline-offset: 0.2rem;
+}
+
+.mermaid[data-zoomable]::after {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 0.2rem;
+  color: var(--md-default-bg-color);
+  background: var(--md-default-fg-color);
+  content: "Click to enlarge";
+  font-size: 0.6rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 125ms;
+}
+
+.mermaid[data-zoomable]:hover::after,
+.mermaid[data-zoomable]:focus-visible::after {
+  opacity: 0.8;
+}
+
+.diagram-zoom {
+  width: calc(100vw - 2rem);
+  max-width: none;
+  height: calc(100vh - 2rem);
+  padding: 0;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.3rem;
+  color: var(--md-default-fg-color);
+  background: var(--md-default-bg-color);
+}
+
+.diagram-zoom::backdrop {
+  background: rgb(0 0 0 / 70%);
+}
+
+.diagram-zoom__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.diagram-zoom__toolbar button {
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.2rem;
+  color: inherit;
+  background: var(--md-code-bg-color);
+  cursor: pointer;
+  font: inherit;
+}
+
+.diagram-zoom__toolbar button:hover,
+.diagram-zoom__toolbar button:focus-visible {
+  border-color: var(--md-accent-fg-color);
+}
+
+.diagram-zoom__level {
+  min-width: 3.5rem;
+  text-align: center;
+}
+
+.diagram-zoom__close {
+  margin-left: 0.5rem;
+}
+
+.diagram-zoom__viewport {
+  height: calc(100% - 2.75rem);
+  overflow: auto;
+  padding: 1rem;
+}
+
+.diagram-zoom__canvas {
+  position: relative;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.diagram-zoom__canvas > .mermaid {
+  margin: 0;
+}

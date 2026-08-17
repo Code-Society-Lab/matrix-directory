@@ -1,0 +1,21 @@
+@media screen and (min-width: 76.25em) {
+  /* Keep the final top-level item as the app link. */
+  .md-tabs__item:last-child {
+    margin-left: auto;
+  }
+
+  .md-tabs__item:last-child .md-tabs__link {
+    margin-top: 0.4rem;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid var(--md-accent-fg-color);
+    border-radius: 0.25rem;
+    color: var(--md-accent-fg-color);
+    opacity: 1;
+  }
+
+  .md-tabs__item:last-child .md-tabs__link:hover,
+  .md-tabs__item:last-child .md-tabs__link:focus-visible {
+    color: var(--md-accent-bg-color);
+    background: var(--md-accent-fg-color);
+  }
+}

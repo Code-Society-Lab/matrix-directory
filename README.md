@@ -15,6 +15,7 @@
 <div align="center">
 
 [![Join Matrix](https://img.shields.io/matrix/codesociety%3Amatrix.org?logo=matrix&label=%20&labelColor=%23202020&color=%23202020)](https://matrix.to/#/%23codesociety:matrix.org)
+[![Tests](https://github.com/Code-Society-Lab/matrix-directory/actions/workflows/tests.yml/badge.svg)](https://github.com/Code-Society-Lab/matrix-directory/actions/workflows/tests.yml)
 [![CodeQL Advanced](https://github.com/Code-Society-Lab/matrix-directory/actions/workflows/codeql.yml/badge.svg)](https://github.com/Code-Society-Lab/matrix-directory/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Code-Society-Lab/matrix-directory/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Code-Society-Lab/matrix-directory)
 
@@ -82,7 +83,7 @@ register an OAuth client and start an HTTPS tunnel:
 python scripts/dev_matrix_tunnel.py
 ```
 
-See [Authentication Architecture](docs/architecture/authentication.md) for details about identity, sessions, and authorization.
+See [Authentication Architecture](docs/docs/architecture/authentication.md) for details about identity, sessions, and authorization.
 
 ## API
 

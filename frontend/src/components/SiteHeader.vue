@@ -18,6 +18,9 @@ import { currentUser, logout } from '../auth'
 import logoUrl from '../assets/matrix-directory-mark.svg'
 
 
+const docsUrl =
+  import.meta.env.VITE_DOCS_URL ?? 'http://127.0.0.1:8001'
+
 const router = useRouter()
 const route = useRoute()
 
@@ -133,12 +136,14 @@ watch(
           Browse
         </RouterLink>
 
-        <span
-          class="cursor-not-allowed rounded-lg px-3 py-2 text-sm text-[var(--faint)]"
-          title="Coming soon"
+        <a
+          :href="docsUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-[var(--muted)] no-underline transition hover:bg-[var(--sunk)] hover:text-[var(--text)]"
         >
           Docs
-        </span>
+        </a>
 
         <RouterLink
           v-if="currentUser"
@@ -315,17 +320,15 @@ watch(
               Profile
             </RouterLink>
 
-            <span
-              class="flex cursor-not-allowed rounded-[8px] px-3 py-2.5 text-sm text-[var(--faint)]"
-              title="Coming soon"
+            <a
+              :href="docsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex rounded-[8px] px-3 py-2.5 text-sm text-[var(--muted)] no-underline transition hover:bg-[var(--sunk)] hover:text-[var(--text)]"
+              @click="menuOpen = false"
             >
               Docs
-              <span
-                class="ml-auto font-mono text-[10px] uppercase tracking-wide"
-              >
-                soon
-              </span>
-            </span>
+            </a>
           </nav>
 
           <!-- Mobile auth action -->
