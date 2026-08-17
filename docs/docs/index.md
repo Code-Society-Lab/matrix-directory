@@ -93,7 +93,7 @@ profiles, project ownership, and directory data.
     Once the services are ready, open:
 
     - [Matrix Directory](http://localhost:5173)
-    - [Interactive API documentation](http://localhost:8000/docs)
+    - [Interactive API documentation](http://localhost:8000/api/docs)
 
 === "Stop or reset"
 

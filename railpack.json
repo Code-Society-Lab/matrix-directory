@@ -16,7 +16,7 @@
         { "src": ".", "dest": "." },
         "python3 -m venv .venv",
         ".venv/bin/pip install --upgrade pip",
-        ".venv/bin/pip install ./backend",
+        ".venv/bin/pip install \"./backend[docs]\"",
         "cd frontend && npm ci"
       ]
     },
@@ -26,12 +26,16 @@
         { "step": "install" }
       ],
       "variables": {
-        "VITE_API_URL": "/api"
+        "VITE_API_URL": "/api",
+        "VITE_DOCS_URL": "/docs/"
       },
       "commands": [
         "cd frontend && npm run build",
+        "cd docs && ../.venv/bin/mkdocs build --strict",
         "mkdir -p backend/static",
-        "cp -R frontend/dist/. backend/static/"
+        "cp -R frontend/dist/. backend/static/",
+        "mkdir -p backend/static/docs",
+        "cp -R docs/site/. backend/static/docs/"
       ]
     }
   },

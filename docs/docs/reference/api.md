@@ -3,7 +3,7 @@
 The FastAPI backend exposes JSON application endpoints under `/api`. This
 page describes the stable behaviors a client needs; the running application
 provides the complete generated schemas in its
-[Swagger UI](https://matrix-directory.codesociety.xyz/docs).
+[Swagger UI](https://matrix-directory.codesociety.xyz/api/docs).
 
 ## At a glance
 
@@ -217,4 +217,4 @@ Changing `matrix_id` clears any existing verification. Clients cannot set
 
 - [Development guide](../development.md)
 - [Authentication architecture](../architecture/authentication.md)
-- [Interactive API documentation](https://matrix-directory.codesociety.xyz/docs)
+- [Interactive API documentation](https://matrix-directory.codesociety.xyz/api/docs)

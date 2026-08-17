@@ -8,6 +8,7 @@ __pycache__/
 coverage.xml
 htmlcov/
 backend/matrix_directory.db
+backend/static/
 frontend/node_modules/
 frontend/dist/
 frontend/.env.*
@@ -18,4 +19,4 @@ frontend/vite.config.d.ts
 .vscode
 matrix_directory_backend.egg-info
 .mypy_cache
-docs/site
+docs/site/

@@ -35,7 +35,7 @@ Docker with Docker Compose is required.
 The services will be available at:
 
 - Frontend: http://localhost:5173
-- API documentation: http://localhost:8000/docs
+- Swagger UI: http://localhost:8000/api/docs
 
 To stop the environment:
 
