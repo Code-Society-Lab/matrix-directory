@@ -41,7 +41,7 @@ services are ready, open:
 | Service | Address |
 | --- | --- |
 | Frontend | <http://localhost:5173> |
-| API documentation | <http://localhost:8000/docs> |
+| Swagger UI | <http://localhost:8000/api/docs> |
 
 You now have the frontend, backend, and database running together. The frontend
 reloads as its source changes; restart the API service after backend changes.

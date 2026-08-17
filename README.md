@@ -52,7 +52,7 @@ docker compose up --build
 The services will be available at:
 
 - [Frontend](http://localhost:5173)
-- [API documentation](http://localhost:8000/docs)
+- [Swagger UI](http://localhost:8000/api/docs)
 
 The backend automatically applies database migrations on startup.
 
@@ -89,7 +89,7 @@ See [Authentication Architecture](docs/docs/architecture/authentication.md) for 
 
 Interactive API documentation is available at:
 
-- [Swagger UI](http://localhost:8000/docs)
+- [Swagger UI](http://localhost:8000/api/docs)
 
 Core endpoints include:
 

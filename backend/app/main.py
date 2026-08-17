@@ -12,7 +12,13 @@ from app.routers.profile_router import router as profile_router
 from app.config import get_settings
 
 settings = get_settings()
-app = FastAPI(title=settings.app_name, version="0.1.0")
+app = FastAPI(
+    title=settings.app_name,
+    version="0.1.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+)
 
 app.add_middleware(
     SessionMiddleware,
@@ -44,28 +50,40 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-frontend_directory = Path(__file__).resolve().parent.parent / "static"
-frontend_index = frontend_directory / "index.html"
-frontend_assets = frontend_directory / "assets"
+def mount_static_sites(application: FastAPI, static_directory: Path) -> None:
+    """Mount the built documentation and frontend when their files exist."""
+    documentation_directory = static_directory / "docs"
+    frontend_index = static_directory / "index.html"
+    frontend_assets = static_directory / "assets"
 
-if frontend_index.is_file():
+    if documentation_directory.is_dir():
+        application.mount(
+            "/docs",
+            StaticFiles(directory=documentation_directory, html=True),
+            name="documentation",
+        )
+
+    if not frontend_index.is_file():
+        return
+
     if frontend_assets.is_dir():
-        app.mount(
+        application.mount(
             "/assets",
             StaticFiles(directory=frontend_assets),
             name="frontend-assets",
         )
 
-    @app.get("/{path:path}", include_in_schema=False)
+    @application.get("/{path:path}", include_in_schema=False)
     def frontend(path: str) -> FileResponse:
-        if path == "api" or path.startswith("api/"):
+        reserved_path = path in {"api", "docs"} or path.startswith(("api/", "docs/"))
+        if reserved_path:
             raise HTTPException(status_code=404, detail="Not Found")
 
-        requested_file = (frontend_directory / path).resolve()
-        if (
-            requested_file.is_relative_to(frontend_directory)
-            and requested_file.is_file()
-        ):
+        requested_file = (static_directory / path).resolve()
+        if requested_file.is_relative_to(static_directory) and requested_file.is_file():
             return FileResponse(requested_file)
 
         return FileResponse(frontend_index)
+
+
+mount_static_sites(app, Path(__file__).resolve().parent.parent / "static")
