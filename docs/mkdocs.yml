@@ -3,6 +3,7 @@
 site_name: Matrix Directory
 site_description: A community directory for projects in the Matrix ecosystem.
 site_url: https://docs.matrix-directory.codesociety.xyz/
+dev_addr: 127.0.0.1:8001
 repo_url: https://github.com/Code-Society-Lab/matrix-directory
 repo_name: Code-Society-Lab/matrix-directory
 
@@ -78,10 +79,6 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.snippets:
       base_path: [".."]
-
-site_url: https://docs.matrix-directory.codesociety.xyz/
-dev_addr: 127.0.0.1:8001
-
 nav:
   - Home: index.md
   - Guides:
