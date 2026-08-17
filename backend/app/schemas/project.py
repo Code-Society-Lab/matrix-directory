@@ -1,7 +1,7 @@
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .category import CategoryRead
 
@@ -19,13 +19,13 @@ class ProjectCreate(BaseModel):
 
     supports_e2ee: bool = False
 
-    category_ids: list[UUID]
+    category_ids: list[UUID] = Field(min_length=1)
 
 
 class ProjectUpdate(BaseModel):
-    name: str | None = None
+    name: str | None = Field(default=None, min_length=2, max_length=100)
     description: str | None = None
-    short_description: str | None = None
+    short_description: str | None = Field(default=None, max_length=240)
 
     repository_url: str | None = None
     website_url: str | None = None
@@ -33,7 +33,23 @@ class ProjectUpdate(BaseModel):
 
     supports_e2ee: bool | None = None
 
-    category_ids: list[UUID] | None = None
+    category_ids: list[UUID] | None = Field(default=None, min_length=1)
+
+    @field_validator(
+        "name",
+        "description",
+        "short_description",
+        "supports_e2ee",
+        "category_ids",
+        mode="before",
+    )
+    @classmethod
+    def reject_explicit_null(cls, value: Any) -> Any:
+        """Reject null for required fields while allowing them to be omitted."""
+        if value is None:
+            raise ValueError("Field cannot be null")
+
+        return value
 
 
 class ProjectOwnerRead(BaseModel):
