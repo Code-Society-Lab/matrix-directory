@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
+site_name: Matrix Directory
+site_description: A community directory for projects in the Matrix ecosystem.
+site_url: https://docs.matrix-directory.codesociety.xyz/
+dev_addr: 127.0.0.1:8001
+repo_url: https://github.com/Code-Society-Lab/matrix-directory
+repo_name: Code-Society-Lab/matrix-directory
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: green
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: green
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - content.code.annotate
+    - content.code.copy
+    - content.footnote.tooltips
+    - content.tabs.link
+    - content.tooltips
+    - navigation.footer
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.path
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github-alt
+  logo: img/matrix-directory-mark.svg
+  favicon: img/favicon.svg
+plugins:
+  - search
+
+extra_css:
+  - stylesheets/diagram-zoom.css
+  - stylesheets/navigation.css
+
+extra_javascript:
+  - javascripts/diagram-zoom.js
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - md_in_html
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.snippets:
+      base_path: [".."]
+nav:
+  - Home: index.md
+  - Guides:
+      - Development: development.md
+  - Reference:
+      - HTTP API: reference/api.md
+  - Architecture:
+      - Authentication: architecture/authentication.md
+  - Open app ↗: https://matrix-directory.codesociety.xyz/

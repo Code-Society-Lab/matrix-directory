@@ -45,6 +45,7 @@ services:
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
       VITE_API_URL: /api
       VITE_API_PROXY_TARGET: http://api:8000
+      VITE_DOCS_URL: ${VITE_DOCS_URL:-http://127.0.0.1:8001}
     ports:
       - "5173:5173"
     volumes:
