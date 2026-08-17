@@ -33,6 +33,7 @@ dependencies = [
 dev = [
   "black==26.5.1",
   "pytest==9.1.1",
+  "pytest-cov==7.1.0",
   "mypy==2.3.0",
 ]
 
@@ -43,3 +44,29 @@ include = ["app*"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+addopts = [
+  "--strict-config",
+  "--strict-markers",
+  "--cov=app",
+  "--cov-report=term-missing",
+  "--cov-fail-under=65",
+]
+filterwarnings = [
+  "error",
+  "ignore:Using `httpx` with `starlette\\.testclient` is deprecated; install `httpx2` instead\\.:starlette.exceptions.StarletteDeprecationWarning",
+]
+
+[tool.black]
+target-version = ["py310"]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+exclude_also = [
+  "if TYPE_CHECKING:",
+]
+precision = 1
+show_missing = true
+skip_covered = true

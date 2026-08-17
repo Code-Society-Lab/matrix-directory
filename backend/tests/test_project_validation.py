@@ -38,8 +38,11 @@ def client() -> Generator[TestClient, None, None]:
     app.dependency_overrides[get_session] = override_session
     app.dependency_overrides[get_current_user] = override_current_user
 
-    with TestClient(app) as test_client:
-        yield test_client
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        engine.dispose()
 
 
 def test_create_with_no_categories__expect_validation_error(
