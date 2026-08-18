@@ -75,21 +75,19 @@ onMounted(load)
         </p>
       </div>
 
-      <button
-        type="button"
-        disabled
-        class="inline-flex cursor-not-allowed items-center gap-2 rounded-[9px] bg-[var(--accent)] px-4 py-2.5 text-sm font-medium text-[#0e1012] opacity-50"
-        title="Coming soon"
+      <RouterLink
+        to="/submit"
+        class="inline-flex items-center gap-2 rounded-[9px] bg-[var(--accent)] px-4 py-2.5 text-sm font-medium text-[#0e1012] no-underline transition hover:bg-[var(--accent-deep)]"
       >
         <PlusIcon class="size-4" />
         Add listing
-      </button>
+      </RouterLink>
     </div>
 
     <!-- Error -->
     <div
       v-if="error"
-      class="mt-8 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      class="mt-8 flex items-center gap-2 rounded-xl border border-[var(--danger-border)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]"
     >
       <ExclamationTriangleIcon class="size-4 shrink-0" />
       {{ error }}
@@ -168,7 +166,7 @@ onMounted(load)
             <button
               type="button"
               :aria-label="`Delete ${project.name}`"
-              class="grid size-9 place-items-center rounded-[8px] text-[var(--faint)] transition hover:bg-red-50 hover:text-red-700"
+              class="grid size-9 place-items-center rounded-[8px] text-[var(--faint)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)]"
               @click="remove(project)"
             >
               <TrashIcon class="size-4" />
@@ -200,9 +198,13 @@ onMounted(load)
           Projects you publish to the Matrix directory will appear here.
         </p>
 
-        <p class="mt-4 font-mono text-[11px] text-[var(--faint)]">
-          Submission support coming soon
-        </p>
+        <RouterLink
+          to="/submit"
+          class="mt-5 inline-flex items-center gap-2 rounded-[9px] bg-[var(--accent)] px-4 py-2.5 text-sm font-medium text-[#0e1012] no-underline transition hover:bg-[var(--accent-deep)]"
+        >
+          <PlusIcon class="size-4" />
+          Add your first listing
+        </RouterLink>
       </div>
     </template>
   </main>

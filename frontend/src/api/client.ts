@@ -1,4 +1,9 @@
-import type { Project, ProjectListItem } from '../types/project'
+import type {
+  Category,
+  Project,
+  ProjectCreate,
+  ProjectListItem,
+} from '../types/project'
 
 interface Profile {
   matrix_id: string | null
@@ -24,6 +29,22 @@ export interface ProfileUpdate {
   website_url: string | null
 }
 
+export type ValidationIssue = {
+  loc: Array<string | number>
+  msg: string
+  type: string
+}
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly issues: ValidationIssue[] = [],
+  ) {
+    super(message)
+  }
+}
+
 const API_URL = import.meta.env.VITE_API_URL ?? '/api'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -38,7 +59,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const body = await response.json().catch(() => null)
-    throw new Error(body?.detail ?? `Request failed with ${response.status}`)
+    const issues = Array.isArray(body?.detail) ? body.detail : []
+    const message =
+      typeof body?.detail === 'string'
+        ? body.detail
+        : `Request failed with ${response.status}`
+
+    throw new ApiError(message, response.status, issues)
   }
 
   if (response.status === 204) {
@@ -80,5 +107,16 @@ export function listMyProjects() {
 export function deleteProject(id: string) {
   return request<void>(`/projects/${id}`, {
     method: 'DELETE',
+  })
+}
+
+export function listCategories() {
+  return request<Category[]>('/categories/')
+}
+
+export function createProject(input: ProjectCreate) {
+  return request<Project>('/projects/', {
+    method: 'POST',
+    body: JSON.stringify(input),
   })
 }

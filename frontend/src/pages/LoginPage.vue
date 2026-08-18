@@ -44,7 +44,7 @@ const loginUrl =
       <!-- Error -->
       <div
         v-if="route.query.error"
-        class="mt-7 flex items-start gap-2.5 rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        class="mt-7 flex items-start gap-2.5 rounded-[10px] border border-[var(--danger-border)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]"
       >
         <ExclamationTriangleIcon
           class="mt-0.5 size-4 shrink-0"
