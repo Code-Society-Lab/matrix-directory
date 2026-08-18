@@ -87,7 +87,7 @@ pytest -q
 During development, run an individual test by its node ID:
 
 ```bash
-pytest tests/test_project_validation.py::test_create_with_no_categories__expect_validation_error -q
+pytest tests/test_project_validation.py::test_create_without_project_type__expect_validation_error -q
 ```
 
 ## Work on the frontend

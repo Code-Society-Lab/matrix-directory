@@ -102,6 +102,9 @@ POST /api/projects/
 PATCH /api/projects/{project_id}
 DELETE /api/projects/{project_id}
 
+GET  /api/project-types/
+GET  /api/labels/
+
 GET  /api/auth/matrix/login
 GET  /api/auth/matrix/callback
 GET  /api/auth/me

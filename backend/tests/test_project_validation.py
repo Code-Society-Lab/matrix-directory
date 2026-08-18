@@ -12,7 +12,8 @@ from sqlmodel.pool import StaticPool
 
 from app.database import get_session
 from app.dependencies import get_current_user
-from app.models.category import Category
+from app.models.label import Label
+from app.models.project_type import ProjectType
 from app.models.user import User
 from app.routers.project_routers import router
 from app.schemas.project import ProjectCreate, ProjectUpdate
@@ -22,7 +23,8 @@ from app.schemas.project import ProjectCreate, ProjectUpdate
 class ProjectClient:
     client: TestClient
     user_id: UUID
-    category_id: UUID
+    project_type_id: UUID
+    label_id: UUID
 
 
 @pytest.fixture
@@ -37,15 +39,18 @@ def project_client() -> Generator[ProjectClient, None, None]:
     app = FastAPI()
     app.include_router(router, prefix="/api")
     user = User(oidc_issuer="issuer", oidc_subject="owner")
-    category = Category(name="Bots")
+    project_type = ProjectType(name="Bot")
+    label = Label(name="Utility")
 
     with Session(engine) as setup_session:
-        setup_session.add_all([user, category])
+        setup_session.add_all([user, project_type, label])
         setup_session.commit()
         setup_session.refresh(user)
-        setup_session.refresh(category)
+        setup_session.refresh(project_type)
+        setup_session.refresh(label)
         user_id = user.id
-        category_id = category.id
+        project_type_id = project_type.id
+        label_id = label.id
 
     def override_session() -> Generator[Session, None, None]:
         with Session(engine) as session:
@@ -59,12 +64,12 @@ def project_client() -> Generator[ProjectClient, None, None]:
 
     try:
         with TestClient(app) as test_client:
-            yield ProjectClient(test_client, user_id, category_id)
+            yield ProjectClient(test_client, user_id, project_type_id, label_id)
     finally:
         engine.dispose()
 
 
-def test_create_with_no_categories__expect_validation_error(
+def test_create_without_project_type__expect_validation_error(
     project_client: ProjectClient,
 ) -> None:
     response = project_client.client.post(
@@ -73,12 +78,12 @@ def test_create_with_no_categories__expect_validation_error(
             "name": "Test Bot",
             "description": "A test bot",
             "short_description": "Test bot",
-            "category_ids": [],
+            "label_ids": [],
         },
     )
 
     assert response.status_code == 422
-    assert response.json()["detail"][0]["loc"] == ["body", "category_ids"]
+    assert response.json()["detail"][0]["loc"] == ["body", "project_type_id"]
 
 
 def test_create__expect_project_associated_with_authenticated_user(
@@ -91,28 +96,45 @@ def test_create__expect_project_associated_with_authenticated_user(
             "description": "A useful bot.",
             "short_description": "Useful bot",
             "repository_url": "https://example.com/test-bot",
-            "category_ids": [str(project_client.category_id)],
+            "project_type_id": str(project_client.project_type_id),
+            "label_ids": [str(project_client.label_id)],
         },
     )
 
     assert response.status_code == 201
     body = response.json()
     assert body["user_id"] == str(project_client.user_id)
-    assert [category["id"] for category in body["categories"]] == [
-        str(project_client.category_id)
-    ]
+    assert body["project_type"]["id"] == str(project_client.project_type_id)
+    assert [label["id"] for label in body["labels"]] == [str(project_client.label_id)]
 
 
-def test_update_with_no_categories__expect_validation_error(
+@pytest.mark.parametrize(
+    ("project_type_id", "label_ids", "message"),
+    [
+        (uuid4(), [], "Project type not found"),
+        (None, [uuid4()], "Labels not found"),
+    ],
+)
+def test_create_with_unknown_classification__expect_bad_request(
     project_client: ProjectClient,
+    project_type_id: UUID | None,
+    label_ids: list[UUID],
+    message: str,
 ) -> None:
-    response = project_client.client.patch(
-        f"/api/projects/{uuid4()}",
-        json={"category_ids": []},
+    response = project_client.client.post(
+        "/api/projects/",
+        json={
+            "name": "Test Bot",
+            "description": "A useful bot.",
+            "short_description": "Useful bot",
+            "repository_url": "https://example.com/test-bot",
+            "project_type_id": str(project_type_id or project_client.project_type_id),
+            "label_ids": [str(label_id) for label_id in label_ids],
+        },
     )
 
-    assert response.status_code == 422
-    assert response.json()["detail"][0]["loc"] == ["body", "category_ids"]
+    assert response.status_code == 400
+    assert message in response.json()["detail"]
 
 
 @pytest.mark.parametrize(
@@ -137,7 +159,8 @@ def test_update_with_invalid_text__expect_validation_error(
         "description",
         "short_description",
         "supports_e2ee",
-        "category_ids",
+        "project_type_id",
+        "label_ids",
     ],
 )
 def test_update_with_null_required_field__expect_validation_error(field: str) -> None:
@@ -159,7 +182,7 @@ def test_create__expect_required_text_trimmed() -> None:
         description="  A useful bot.  ",
         short_description="  Useful bot  ",
         repository_url="https://example.com/test-bot",
-        category_ids=[uuid4()],
+        project_type_id=uuid4(),
     )
 
     assert project.name == "Test Bot"
@@ -178,7 +201,7 @@ def test_create_with_whitespace_only_text__expect_validation_error(
         "name": "Test Bot",
         "description": "A useful bot.",
         "short_description": "Useful bot",
-        "category_ids": [uuid4()],
+        "project_type_id": uuid4(),
     }
     data[field] = "   "
 
@@ -197,7 +220,7 @@ def test_create_with_invalid_url__expect_validation_error(url: str) -> None:
             description="A useful bot.",
             short_description="Useful bot",
             repository_url=url,
-            category_ids=[uuid4()],
+            project_type_id=uuid4(),
         )
 
 
@@ -210,7 +233,7 @@ def test_create_with_overlong_url__expect_validation_error() -> None:
             description="A useful bot.",
             short_description="Useful bot",
             repository_url=url,
-            category_ids=[uuid4()],
+            project_type_id=uuid4(),
         )
 
 
@@ -221,19 +244,20 @@ def test_create_with_blank_optional_url__expect_null() -> None:
         short_description="Useful bot",
         repository_url="https://example.com/test-bot",
         website_url="   ",
-        category_ids=[uuid4()],
+        project_type_id=uuid4(),
     )
 
     assert project.website_url is None
 
 
-def test_create_with_duplicate_categories__expect_validation_error() -> None:
-    category_id = uuid4()
+def test_create_with_duplicate_labels__expect_validation_error() -> None:
+    label_id = uuid4()
 
-    with pytest.raises(ValidationError, match="Categories must be unique"):
+    with pytest.raises(ValidationError, match="Labels must be unique"):
         ProjectCreate(
             name="Test Bot",
             description="A useful bot.",
             short_description="Useful bot",
-            category_ids=[category_id, category_id],
+            project_type_id=uuid4(),
+            label_ids=[label_id, label_id],
         )

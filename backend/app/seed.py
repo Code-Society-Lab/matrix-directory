@@ -1,12 +1,23 @@
 from sqlmodel import Session, select
 
 from app.database import engine
-from app.models.category import Category
+from app.models.label import Label
 from app.models.profile import Profile
 from app.models.project import Project
+from app.models.project_type import ProjectType
 from app.models.user import User
 
 ADA_REPOSITORY_URL = "https://github.com/Code-Society-Lab/ada"
+
+PROJECT_TYPE_NAMES = (
+    "Bot",
+    "SDK",
+    "Framework",
+    "Bridges",
+    "Clients",
+    "Server",
+    "Integrations",
+)
 
 SEED_OIDC_ISSUER = "seed://matrix-directory"
 SEED_OIDC_SUBJECT = "penguinboi"
@@ -81,29 +92,50 @@ def get_or_create_profile(
     return profile
 
 
-def get_or_create_category(
+def get_or_create_project_type(
     session: Session,
     *,
     name: str,
-) -> Category:
-    category = session.exec(select(Category).where(Category.name == name)).first()
+) -> ProjectType:
+    project_type = session.exec(
+        select(ProjectType).where(ProjectType.name == name)
+    ).first()
 
-    if category is not None:
-        return category
+    if project_type is not None:
+        return project_type
 
-    category = Category(name=name)
+    project_type = ProjectType(name=name)
 
-    session.add(category)
+    session.add(project_type)
     session.flush()
 
-    return category
+    return project_type
+
+
+def get_or_create_label(
+    session: Session,
+    *,
+    name: str,
+) -> Label:
+    label = session.exec(select(Label).where(Label.name == name)).first()
+
+    if label is not None:
+        return label
+
+    label = Label(name=name)
+
+    session.add(label)
+    session.flush()
+
+    return label
 
 
 def get_or_create_ada(
     session: Session,
     *,
     owner: User,
-    categories: list[Category],
+    project_type: ProjectType,
+    labels: list[Label],
 ) -> Project:
     project = session.exec(
         select(Project).where(Project.repository_url == ADA_REPOSITORY_URL)
@@ -116,6 +148,7 @@ def get_or_create_ada(
             description="",
             repository_url=ADA_REPOSITORY_URL,
             user_id=owner.id,
+            project_type_id=project_type.id,
         )
 
         session.add(project)
@@ -133,7 +166,8 @@ def get_or_create_ada(
     project.website_url = "https://codesociety.xyz/"
     project.matrix_server_url = "https://matrix.to/#/#codesociety:matrix.org"
     project.supports_e2ee = False
-    project.categories = categories
+    project.project_type = project_type
+    project.labels = labels
 
     return project
 
@@ -154,12 +188,17 @@ def seed() -> None:
             display_name="PenguinBoi",
         )
 
-        development_category = get_or_create_category(
+        project_types = {
+            name: get_or_create_project_type(session, name=name)
+            for name in PROJECT_TYPE_NAMES
+        }
+
+        development_label = get_or_create_label(
             session,
             name="Dev tools",
         )
 
-        utilities_category = get_or_create_category(
+        utilities_label = get_or_create_label(
             session,
             name="Utility",
         )
@@ -167,9 +206,10 @@ def seed() -> None:
         get_or_create_ada(
             session,
             owner=owner,
-            categories=[
-                development_category,
-                utilities_category,
+            project_type=project_types["Bot"],
+            labels=[
+                development_label,
+                utilities_label,
             ],
         )
 

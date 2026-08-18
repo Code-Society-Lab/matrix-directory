@@ -1,16 +1,19 @@
 """Database models loaded as a group for SQLAlchemy relationship setup."""
 
-from .category import Category
 from .auth import AuthSession
-from .project import Project, ProjectCategory
+from .label import Label
+from .project import Project
+from .project_label import ProjectLabel
+from .project_type import ProjectType
 from .user import User
 from .profile import Profile
 
 __all__ = [
     "AuthSession",
-    "Category",
+    "Label",
     "Project",
-    "ProjectCategory",
+    "ProjectLabel",
+    "ProjectType",
     "User",
     "Profile",
 ]

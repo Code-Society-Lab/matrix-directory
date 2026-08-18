@@ -5,31 +5,17 @@ from uuid import UUID, uuid4
 from sqlmodel import Field, Relationship
 from sqlmodel_toolkit import Model
 
+from .label import Label
+from .project_label import ProjectLabel
+from .project_type import ProjectType
+
 if TYPE_CHECKING:
-    from .category import Category
     from .user import User
 
 
 def utc_now() -> datetime:
     """Return the current UTC time without timezone information."""
     return datetime.now(UTC).replace(tzinfo=None)
-
-
-class ProjectCategory(Model, table=True):
-    """Association table between projects and categories."""
-
-    __tablename__ = "project_categories"
-
-    project_id: UUID = Field(
-        foreign_key="projects.id",
-        primary_key=True,
-        index=True,
-    )
-    category_id: UUID = Field(
-        foreign_key="categories.id",
-        primary_key=True,
-        index=True,
-    )
 
 
 class Project(Model, table=True):
@@ -72,13 +58,16 @@ class Project(Model, table=True):
 
     supports_e2ee: bool = Field(default=False)
 
-    owner: "User" = Relationship(
+    project_type_id: UUID = Field(foreign_key="project_types.id", index=True)
+    project_type: ProjectType = Relationship(back_populates="projects")
+
+    labels: list[Label] = Relationship(
         back_populates="projects",
+        link_model=ProjectLabel,
     )
 
-    categories: list["Category"] = Relationship(
+    owner: "User" = Relationship(
         back_populates="projects",
-        link_model=ProjectCategory,
     )
 
     created_at: datetime = Field(

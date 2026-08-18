@@ -9,7 +9,7 @@ provides the complete generated schemas in its
 
 - Public reads do not require authentication.
 - Profile and project-management endpoints use a browser session cookie.
-- Project IDs, category IDs, and user IDs are UUIDs.
+- Project, project-type, label, and user IDs are UUIDs.
 - Request validation failures use FastAPI's standard `422` response.
 - Project ownership is derived from the session and cannot be supplied by a client.
 
@@ -57,7 +57,7 @@ Application errors use a JSON `detail` field:
 
 | Status | Typical cause |
 | --- | --- |
-| `400 Bad Request` | A category does not exist or an update would remove every project link |
+| `400 Bad Request` | A project type or label does not exist, or an update removes every project link |
 | `401 Unauthorized` | The session cookie is missing, invalid, or expired |
 | `404 Not Found` | The resource is missing or unavailable to its current user |
 | `422 Unprocessable Content` | The request body or path parameters are invalid |
@@ -99,9 +99,8 @@ GET /api/health
 
 ### Create a project
 
-A project requires at least one valid category and at least one repository or
-website. The authenticated user becomes the owner; there is no writable
-`user_id` field.
+A project requires one valid project type. Labels are optional. The
+authenticated user becomes the owner; there is no writable `user_id` field.
 
 ```json
 {
@@ -112,8 +111,9 @@ website. The authenticated user becomes the owner; there is no writable
   "website_url": null,
   "matrix_server_url": null,
   "supports_e2ee": true,
-  "category_ids": [
-    "11111111-1111-1111-1111-111111111111"
+  "project_type_id": "11111111-1111-1111-1111-111111111111",
+  "label_ids": [
+    "22222222-2222-2222-2222-222222222222"
   ]
 }
 ```
@@ -121,13 +121,14 @@ website. The authenticated user becomes the owner; there is no writable
 | Field | Required | Constraints |
 | --- | --- | --- |
 | `name` | Yes | 2–100 characters |
-| `description` | Yes | 1–10,000 characters; surrounding whitespace is removed |
-| `short_description` | Yes | 1–160 characters; surrounding whitespace is removed |
-| `repository_url` | Conditional | Absolute HTTP(S) URL up to 255 characters; required when `website_url` is absent |
-| `website_url` | Conditional | Absolute HTTP(S) URL up to 255 characters; required when `repository_url` is absent |
+| `description` | Yes | 1–10,000 characters |
+| `short_description` | Yes | 1–160 characters |
+| `repository_url` | Conditional | Absolute HTTP(S) URL up to 255 characters; required without a website |
+| `website_url` | Conditional | Absolute HTTP(S) URL up to 255 characters; required without a repository |
 | `matrix_server_url` | No | Absolute HTTP(S) URL up to 255 characters or `null` |
 | `supports_e2ee` | No | Boolean; defaults to `false` |
-| `category_ids` | Yes | Non-empty list of unique, existing category UUIDs |
+| `project_type_id` | Yes | Existing project-type UUID |
+| `label_ids` | No | Unique existing label UUIDs; defaults to an empty list |
 
 ### Update a project
 
@@ -141,17 +142,19 @@ website. The authenticated user becomes the owner; there is no writable
 ```
 
 The required project fields—`name`, `description`, `short_description`,
-`supports_e2ee`, and `category_ids`—may be omitted from a patch but cannot
-be explicitly set to `null`. URL fields may be cleared with `null`, but an
-update cannot leave both `repository_url` and `website_url` empty.
+`supports_e2ee`, `project_type_id`, and `label_ids`—may be omitted from a patch
+but cannot be explicitly set to `null`. Pass an empty `label_ids` list to clear
+all labels. URL fields may be cleared with `null`, but a project must retain a
+repository or website.
 
 ### Project response
 
-Project responses include public owner details and expanded categories:
+Project responses include public owner details, one expanded project type, and
+expanded labels:
 
 ```json
 {
-  "id": "22222222-2222-2222-2222-222222222222",
+  "id": "33333333-3333-3333-3333-333333333333",
   "name": "Example Bot",
   "description": "A longer description of the project.",
   "short_description": "A concise project summary.",
@@ -159,40 +162,37 @@ Project responses include public owner details and expanded categories:
   "website_url": null,
   "matrix_server_url": null,
   "supports_e2ee": true,
-  "user_id": "33333333-3333-3333-3333-333333333333",
+  "project_type": {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "name": "Bot"
+  },
+  "labels": [
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "name": "Utility"
+    }
+  ],
+  "user_id": "44444444-4444-4444-4444-444444444444",
   "owner": {
-    "id": "33333333-3333-3333-3333-333333333333",
+    "id": "44444444-4444-4444-4444-444444444444",
     "display_name": "Example Maintainer",
     "matrix_id": "@maintainer:example.org",
     "avatar_url": null
   },
-  "categories": [
-    {
-      "id": "11111111-1111-1111-1111-111111111111",
-      "name": "Bots"
-    }
-  ],
   "created_at": "2026-08-18T12:00:00",
   "updated_at": "2026-08-18T12:00:00"
 }
 ```
 
-## Categories
+## Classifications
 
-Categories are public reference data used by the submission form.
+The submission form reads the available project types and labels from public
+lookup endpoints.
 
 | Method | Path | Access | Success | Description |
 | --- | --- | --- | --- | --- |
-| `GET` | `/api/categories/` | Public | `200 OK` | List categories alphabetically |
-
-```json
-[
-  {
-    "id": "11111111-1111-1111-1111-111111111111",
-    "name": "Bots"
-  }
-]
-```
+| `GET` | `/api/project-types/` | Public | `200 OK` | List project types alphabetically |
+| `GET` | `/api/labels/` | Public | `200 OK` | List labels alphabetically |
 
 ## Authentication
 

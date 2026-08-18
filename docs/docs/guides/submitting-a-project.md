@@ -34,6 +34,18 @@ The listing is associated with your authenticated account and published
 immediately. After a successful submission, the application redirects you to
 the new public listing.
 
+## Types and labels
+
+A project type describes what the project **is**. Every listing has exactly
+one of the initial directory types: **Bot**, **SDK**, **Framework**,
+**Bridges**, **Clients**, **Server**, or **Integrations**.
+
+Labels describe what the project **does**. A listing may have any number of
+labels, including none. Examples include **Dev tools** and **Utility**.
+
+This separation lets visitors filter by both the project format and its
+purpose.
+
 ## Field requirements
 
 | Field | Requirement |
@@ -41,18 +53,22 @@ the new public listing.
 | Name | Required; 2–100 characters |
 | Short description | Required; 1–160 characters |
 | About | Required; 1–10,000 characters; Markdown supported |
-| Repository | Optional individually; required if no website is supplied |
-| Website | Optional individually; required if no repository is supplied |
+| Repository | Required when no website is supplied |
+| Website | Required when no repository is supplied |
 | Matrix room | Optional |
-| Categories | At least one required; duplicate categories are not accepted |
-| E2EE support | Select only when the project can operate in encrypted Matrix rooms |
+| Project type | Exactly one required |
+| Labels | Optional; duplicate labels are rejected |
+| E2EE support | Select when the project operates in encrypted Matrix rooms |
 
-Repository, website, and Matrix room values must be absolute `http://` or
-`https://` URLs no longer than 255 characters. Blank optional URLs are treated
-as omitted.
+URLs must be absolute `http://` or `https://` URLs no longer than 255
+characters.
 
 At least one repository or website must remain on the listing when it is
 updated later.
+
+!!! note "Listings are public"
+    Do not include secrets, access tokens, private room links, or other
+    information that should not appear in the public directory.
 
 ## Markdown descriptions
 
