@@ -1,8 +1,9 @@
 import type {
-  Category,
+  Label,
   Project,
   ProjectCreate,
   ProjectListItem,
+  ProjectType,
 } from '../types/project'
 
 interface Profile {
@@ -110,8 +111,12 @@ export function deleteProject(id: string) {
   })
 }
 
-export function listCategories() {
-  return request<Category[]>('/categories/')
+export function listProjectTypes() {
+  return request<ProjectType[]>('/project-types/')
+}
+
+export function listLabels() {
+  return request<Label[]>('/labels/')
 }
 
 export function createProject(input: ProjectCreate) {

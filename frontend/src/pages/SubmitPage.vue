@@ -10,10 +10,11 @@ import {
 import {
   ApiError,
   createProject,
-  listCategories,
+  listLabels,
+  listProjectTypes,
 } from '../api/client'
 import MarkdownEditor from '../components/markdown/MarkdownEditor.vue'
-import type { Category, ProjectCreate } from '../types/project'
+import type { Label, ProjectCreate, ProjectType } from '../types/project'
 
 const router = useRouter()
 
@@ -26,18 +27,20 @@ const form = reactive<ProjectCreate>({
   website_url: null,
   matrix_server_url: null,
   supports_e2ee: false,
-  category_ids: [],
+  project_type_id: '',
+  label_ids: [],
 })
 
-const categories = ref<Category[]>([])
-const loadingCategories = ref(true)
+const projectTypes = ref<ProjectType[]>([])
+const labels = ref<Label[]>([])
+const loadingClassifications = ref(true)
 const submitting = ref(false)
 const formError = ref('')
 const fieldErrors = ref<Record<string, string>>({})
 
-const selectedCategories = computed(() =>
-  categories.value.filter((category) =>
-    form.category_ids.includes(category.id),
+const selectedLabels = computed(() =>
+  labels.value.filter((label) =>
+    form.label_ids.includes(label.id),
   ),
 )
 
@@ -54,14 +57,14 @@ const hasProjectLink = computed(() =>
 
 const cannotSubmit = computed(() =>
   submitting.value ||
-  loadingCategories.value ||
+  loadingClassifications.value ||
   !form.name.trim() ||
   !form.short_description.trim() ||
   !form.description.trim() ||
+  !form.project_type_id ||
   !hasProjectLink.value ||
   form.short_description.length > 160 ||
-  form.description.length > 10000 ||
-  form.category_ids.length === 0,
+  form.description.length > 10000,
 )
 
 const checklist = computed(() => [
@@ -86,9 +89,14 @@ const checklist = computed(() => [
     required: true,
   },
   {
-    label: 'Categories',
-    complete: form.category_ids.length > 0,
+    label: 'Project type',
+    complete: Boolean(form.project_type_id),
     required: true,
+  },
+  {
+    label: 'Labels',
+    complete: form.label_ids.length > 0,
+    required: false,
   },
   {
     label: 'Matrix room',
@@ -165,14 +173,19 @@ async function submit() {
 
 onMounted(async () => {
   try {
-    categories.value = await listCategories()
+    const [availableProjectTypes, availableLabels] = await Promise.all([
+      listProjectTypes(),
+      listLabels(),
+    ])
+    projectTypes.value = availableProjectTypes
+    labels.value = availableLabels
   } catch (error) {
     formError.value =
       error instanceof Error
         ? error.message
-        : 'Could not load categories.'
+        : 'Could not load project classifications.'
   } finally {
-    loadingCategories.value = false
+    loadingClassifications.value = false
   }
 })
 </script>
@@ -467,41 +480,42 @@ onMounted(async () => {
 
           <fieldset class="mt-6">
             <legend class="text-[13px] font-medium text-[var(--text)]">
-              Categories
+              Project type
               <span class="text-[var(--danger)]">*</span>
             </legend>
 
             <p class="mt-1 text-[12.5px] text-[var(--muted)]">
-              Select the categories that describe this project.
+              Choose the single option that best describes what this project is.
             </p>
 
             <p
-              v-if="loadingCategories"
+              v-if="loadingClassifications"
               class="mt-4 font-mono text-xs text-[var(--faint)]"
             >
-              Loading categories…
+              Loading project types…
             </p>
 
             <div
-              v-else-if="categories.length"
+              v-else-if="projectTypes.length"
               class="mt-4 flex flex-wrap gap-2"
             >
               <label
-                v-for="category in categories"
-                :key="category.id"
+                v-for="projectType in projectTypes"
+                :key="projectType.id"
                 class="group cursor-pointer"
               >
                 <input
-                  v-model="form.category_ids"
-                  type="checkbox"
-                  :value="category.id"
+                  v-model="form.project_type_id"
+                  type="radio"
+                  name="project-type"
+                  :value="projectType.id"
                   class="peer sr-only"
                 >
 
                 <span
                   class="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[13px] text-[var(--muted)] transition group-hover:border-[var(--border-strong)] group-hover:text-[var(--text)] peer-checked:border-[var(--accent-deep)] peer-checked:bg-[var(--accent-soft)] peer-checked:font-medium peer-checked:text-[var(--accent-ink)]"
                 >
-                  {{ category.name }}
+                  {{ projectType.name }}
                 </span>
               </label>
             </div>
@@ -510,14 +524,72 @@ onMounted(async () => {
               v-else
               class="mt-4 text-sm text-[var(--muted)]"
             >
-              No categories are available yet.
+              No project types are available yet.
             </p>
 
             <span
-              v-if="fieldError('category_ids')"
+              v-if="fieldError('project_type_id')"
               class="mt-2 block text-xs text-[var(--danger)]"
             >
-              {{ fieldError('category_ids') }}
+              {{ fieldError('project_type_id') }}
+            </span>
+          </fieldset>
+
+          <fieldset class="mt-7">
+            <legend class="text-[13px] font-medium text-[var(--text)]">
+              Labels
+              <span class="text-[12px] font-normal text-[var(--faint)]">
+                Optional
+              </span>
+            </legend>
+
+            <p class="mt-1 text-[12.5px] text-[var(--muted)]">
+              Select any labels that describe what the project does.
+            </p>
+
+            <p
+              v-if="loadingClassifications"
+              class="mt-4 font-mono text-xs text-[var(--faint)]"
+            >
+              Loading labels…
+            </p>
+
+            <div
+              v-else-if="labels.length"
+              class="mt-4 flex flex-wrap gap-2"
+            >
+              <label
+                v-for="label in labels"
+                :key="label.id"
+                class="group cursor-pointer"
+              >
+                <input
+                  v-model="form.label_ids"
+                  type="checkbox"
+                  :value="label.id"
+                  class="peer sr-only"
+                >
+
+                <span
+                  class="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[13px] text-[var(--muted)] transition group-hover:border-[var(--border-strong)] group-hover:text-[var(--text)] peer-checked:border-[var(--accent-deep)] peer-checked:bg-[var(--accent-soft)] peer-checked:font-medium peer-checked:text-[var(--accent-ink)]"
+                >
+                  {{ label.name }}
+                </span>
+              </label>
+            </div>
+
+            <p
+              v-else
+              class="mt-4 text-sm text-[var(--muted)]"
+            >
+              No labels are available yet.
+            </p>
+
+            <span
+              v-if="fieldError('label_ids')"
+              class="mt-2 block text-xs text-[var(--danger)]"
+            >
+              {{ fieldError('label_ids') }}
             </span>
           </fieldset>
         </section>
@@ -637,17 +709,25 @@ onMounted(async () => {
 
                 <div
                   v-if="
-                    selectedCategories.length ||
+                    form.project_type_id ||
+                      selectedLabels.length ||
                       form.supports_e2ee
                   "
                   class="mt-4 flex flex-wrap gap-1.5"
                 >
                   <span
-                    v-for="category in selectedCategories"
-                    :key="category.id"
+                    v-if="form.project_type_id"
+                    class="rounded-md bg-[var(--accent-soft)] px-2 py-1 text-[10px] font-medium text-[var(--accent-ink)]"
+                  >
+                    {{ projectTypes.find((item) => item.id === form.project_type_id)?.name }}
+                  </span>
+
+                  <span
+                    v-for="label in selectedLabels"
+                    :key="label.id"
                     class="rounded-md bg-[var(--sunk)] px-2 py-1 text-[10px] text-[var(--muted)]"
                   >
-                    {{ category.name }}
+                    {{ label.name }}
                   </span>
 
                   <span
