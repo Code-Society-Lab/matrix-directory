@@ -12,17 +12,22 @@ import type { ProjectListItem } from '../types/project'
 
 const projects = ref<ProjectListItem[]>([])
 const query = ref('')
-const category = ref('')
+const projectTypeFilter = ref('')
+const labelFilter = ref('')
 const loading = ref(true)
 const error = ref('')
 
-const botCount = computed(() => projects.value.length)
+const projectCount = computed(() => projects.value.length)
 
-const categories = computed(() =>
+const projectTypes = computed(() =>
+  [...new Set(projects.value.map((project) => project.project_type.name))].sort(),
+)
+
+const labels = computed(() =>
   [
     ...new Set(
       projects.value.flatMap((project) =>
-        project.categories.map((item) => item.name),
+        project.labels.map((item) => item.name),
       ),
     ),
   ].sort(),
@@ -55,32 +60,44 @@ const visibleProjects = computed(() => {
         project.name,
         project.short_description,
         project.description,
+        project.project_type.name,
+        ...project.labels.map((item) => item.name),
       ]
         .join(' ')
         .toLowerCase()
         .includes(normalizedQuery)
 
-    const matchesCategory =
-      !category.value ||
-      project.categories.some(
-        (item) => item.name === category.value,
-      )
+    const matchesProjectType =
+      !projectTypeFilter.value ||
+      project.project_type.name === projectTypeFilter.value
 
-    return matchesQuery && matchesCategory
+    const matchesLabel =
+      !labelFilter.value ||
+      project.labels.some((item) => item.name === labelFilter.value)
+
+    return matchesQuery && matchesProjectType && matchesLabel
   })
 })
 
 const hasFilters = computed(
-  () => Boolean(query.value.trim()) || Boolean(category.value),
+  () =>
+    Boolean(query.value.trim()) ||
+    Boolean(projectTypeFilter.value) ||
+    Boolean(labelFilter.value),
 )
 
-function selectCategory(value: string) {
-  category.value = category.value === value ? '' : value
+function selectProjectType(value: string) {
+  projectTypeFilter.value = projectTypeFilter.value === value ? '' : value
+}
+
+function selectLabel(value: string) {
+  labelFilter.value = labelFilter.value === value ? '' : value
 }
 
 function clearFilters() {
   query.value = ''
-  category.value = ''
+  projectTypeFilter.value = ''
+  labelFilter.value = ''
 }
 
 async function loadProjects() {
@@ -93,7 +110,7 @@ async function loadProjects() {
     error.value =
       err instanceof Error
         ? err.message
-        : 'Could not load bots.'
+        : 'Could not load projects.'
   } finally {
     loading.value = false
   }
@@ -103,96 +120,227 @@ onMounted(loadProjects)
 </script>
 
 <template>
-  <main
-    class="mx-auto max-w-[1120px] px-5 pb-24 sm:px-8"
-  >
+  <main class="mx-auto max-w-[1120px] px-5 pb-24 sm:px-8">
     <!-- Hero -->
-    <section class="max-w-[760px] pb-10 pt-16 sm:pt-18">
-      <p
-        class="font-mono text-xs font-medium uppercase tracking-[0.08em] text-[var(--accent-ink)]"
-      >
-        Open directory · {{ botCount }}
-        {{ botCount === 1 ? 'bot' : 'bots' }}
+    <section class="max-w-[860px] pb-8 pt-10 sm:pb-8 sm:pt-14">
+      <p class="font-mono text-xs font-medium uppercase tracking-[0.08em] text-[var(--accent-ink)]">
+        Open directory · {{ projectCount }}
+        {{ projectCount === 1 ? 'project' : 'projects' }}
       </p>
 
       <h1
-        class="mt-4 max-w-[750px] font-display text-[42px] font-semibold leading-[1.06] tracking-[-0.035em] text-[var(--text)] sm:text-[52px]"
+        class="
+          mt-4 max-w-[850px]
+          font-display text-[36px] font-semibold
+          leading-[1.08] tracking-[-0.035em]
+          text-[var(--text)]
+          sm:text-[52px] sm:leading-[1.06]
+        "
       >
-        Find a bot for your Matrix room.
+        Find tools for Matrix.
       </h1>
 
       <p
-        class="mt-5 max-w-[580px] text-[16px] leading-7 text-[var(--muted)] sm:text-[17px]"
+        class="
+          mt-4 max-w-[680px]
+          text-[15px] leading-6 text-[var(--muted)]
+          sm:mt-5 sm:text-[17px] sm:leading-7
+        "
       >
-        Discover bridges, moderation tools, games, and assistants
-        listed by the people who build them.
+        Discover bots, bridges, frameworks, and tools built by the Matrix community.
       </p>
     </section>
 
-    <!-- Search -->
+    <!-- Search and filters -->
     <section>
-      <div
-        class="flex items-center gap-3 rounded-[14px] border border-[var(--border-strong)] bg-[var(--surface)] p-1.5 pl-4 shadow-[var(--shadow)]"
-      >
+      <!-- Search -->
+      <label class="relative block">
+        <span class="sr-only">Search directory</span>
+
         <MagnifyingGlassIcon
-          class="size-5 shrink-0 text-[var(--faint)]"
+          class="
+            pointer-events-none absolute left-3.5 top-1/2 size-4
+            -translate-y-1/2 text-[var(--faint)]
+          "
         />
 
-        <label class="min-w-0 flex-1">
-          <span class="sr-only">
-            Search bots
+        <input
+          v-model="query"
+          type="search"
+          placeholder="Search projects…"
+          class="
+            h-11 w-full rounded-[10px]
+            border border-[var(--border-strong)]
+            bg-[var(--surface)]
+            pl-10 pr-4
+            text-[14px] text-[var(--text)]
+            outline-none transition
+            placeholder:text-[var(--faint)]
+            focus:border-[var(--accent)]
+            focus:ring-3 focus:ring-[var(--accent-soft)]
+            sm:h-12 sm:text-[15px]
+          "
+        >
+      </label>
+
+      <!-- Filters -->
+      <div class="mt-4 space-y-4 sm:space-y-2.5">
+        <!-- Project types -->
+        <fieldset
+          v-if="projectTypes.length"
+          class="
+            grid gap-2
+            sm:grid-cols-[68px_minmax(0,1fr)]
+            sm:items-center
+          "
+        >
+          <legend class="sr-only">
+            Project type
+          </legend>
+
+          <span
+            class="
+              font-mono text-[9px] font-medium uppercase
+              tracking-[0.08em] text-[var(--faint)]
+            "
+          >
+            Type
           </span>
 
-          <input
-            v-model="query"
-            type="search"
-            placeholder="Search bots, bridges, keywords…"
-            class="w-full border-0 bg-transparent py-3 text-[16px] text-[var(--text)] outline-none placeholder:text-[var(--faint)]"
+          <div
+            class="
+              -mx-5 flex gap-2 overflow-x-auto
+              px-5 pb-1
+              [scrollbar-width:none]
+              [&::-webkit-scrollbar]:hidden
+              sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0
+            "
           >
-        </label>
+            <button
+              type="button"
+              class="
+                shrink-0 rounded-full border
+                px-3 py-1.5
+                text-[12.5px] transition
+              "
+              :class="!projectTypeFilter
+                ? 'border-[var(--accent-deep)] bg-[var(--accent-soft)] font-medium text-[var(--accent-ink)]'
+                : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]'
+              "
+              @click="projectTypeFilter = ''"
+            >
+              All
+            </button>
 
-        <button
-          v-if="query"
-          type="button"
-          aria-label="Clear search"
-          class="grid size-9 shrink-0 place-items-center rounded-lg text-[var(--faint)] transition hover:bg-[var(--sunk)] hover:text-[var(--text)]"
-          @click="query = ''"
+            <button
+              v-for="item in projectTypes"
+              :key="item"
+              type="button"
+              class="
+                shrink-0 rounded-full border
+                px-3 py-1.5
+                text-[12.5px] transition
+              "
+              :class="projectTypeFilter === item
+                ? 'border-[var(--accent)] bg-[var(--surface)] font-medium text-[var(--accent-ink)]'
+                : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]'
+              "
+              @click="selectProjectType(item)"
+            >
+              {{ item }}
+            </button>
+          </div>
+        </fieldset>
+
+        <!-- Categories -->
+        <fieldset
+          v-if="labels.length"
+          class="
+            grid gap-2
+            sm:grid-cols-[68px_minmax(0,1fr)]
+            sm:items-center
+          "
         >
-          <XMarkIcon class="size-4" />
-        </button>
+          <legend class="sr-only">
+            Category
+          </legend>
+
+          <span
+            class="
+              font-mono text-[9px] font-medium uppercase
+              tracking-[0.08em] text-[var(--faint)]
+            "
+          >
+            Category
+          </span>
+
+          <div
+            class="
+              -mx-5 flex gap-2 overflow-x-auto
+              px-5 pb-1
+              [scrollbar-width:none]
+              [&::-webkit-scrollbar]:hidden
+              sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0
+            "
+          >
+            <button
+              type="button"
+              class="
+                shrink-0 rounded-full border
+                px-3 py-1.5
+                text-[12.5px] transition
+              "
+              :class="!labelFilter
+                ? 'border-[var(--accent-deep)] bg-[var(--accent-soft)] font-medium text-[var(--accent-ink)]'
+                : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]'
+              "
+              @click="labelFilter = ''"
+            >
+              All
+            </button>
+
+            <button
+              v-for="item in labels"
+              :key="item"
+              type="button"
+              class="
+                shrink-0 rounded-full border
+                px-3 py-1.5
+                text-[12.5px] transition
+              "
+              :class="labelFilter === item
+                ? 'border-[var(--accent)] bg-[var(--surface)] font-medium text-[var(--accent-ink)]'
+                : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]'
+              "
+              @click="selectLabel(item)"
+            >
+              {{ item }}
+            </button>
+          </div>
+        </fieldset>
       </div>
 
-      <!-- Categories -->
+      <!-- Active filters -->
       <div
-        v-if="categories.length"
-        class="mt-4 flex flex-wrap gap-2"
+        v-if="hasFilters"
+        class="mt-4 flex items-center gap-3"
       >
-        <button
-          type="button"
-          class="rounded-full border px-3.5 py-1.5 text-[13px] transition"
-          :class="
-            !category
-              ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-ink)]'
-              : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent-ink)]'
-          "
-          @click="category = ''"
-        >
-          All
-        </button>
+        <span class="font-mono text-[10px] text-[var(--faint)]">
+          {{ visibleProjects.length }}
+          {{ visibleProjects.length === 1 ? 'result' : 'results' }}
+        </span>
 
         <button
-          v-for="item in categories"
-          :key="item"
           type="button"
-          class="rounded-full border px-3.5 py-1.5 text-[13px] transition"
-          :class="
-            category === item
-              ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-ink)]'
-              : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent-ink)]'
+          class="
+            inline-flex items-center gap-1
+            text-[12px] text-[var(--muted)]
+            transition hover:text-[var(--text)]
           "
-          @click="selectCategory(item)"
+          @click="clearFilters"
         >
-          {{ item }}
+          <XMarkIcon class="size-3.5" />
+          Clear filters
         </button>
       </div>
     </section>
@@ -211,27 +359,27 @@ onMounted(loadProjects)
       v-else-if="loading"
       class="mt-12 font-mono text-xs text-[var(--faint)]"
     >
-      Loading bots…
+      Loading projects…
     </div>
 
     <!-- Results -->
     <template v-else-if="visibleProjects.length">
-      <section class="mt-16">
+      <section class="mt-8 sm:mt-12">
         <!-- Section heading -->
-        <div
-          class="flex items-end justify-between gap-4 border-b border-[var(--border)] pb-3"
-        >
+        <div class="flex items-end justify-between gap-4 border-b border-[var(--border)] pb-3">
           <div>
             <h2
-              class="font-display text-[22px] font-semibold tracking-[-0.01em] text-[var(--text)]"
+              class="
+                font-display text-[20px] font-semibold
+                tracking-[-0.01em] text-[var(--text)]
+                sm:text-[22px]
+              "
             >
-              {{ hasFilters ? 'Search results' : 'Explore bots' }}
+              {{ hasFilters ? 'Search results' : 'Explore projects' }}
             </h2>
           </div>
 
-          <span
-            class="font-mono text-[11.5px] text-[var(--faint)]"
-          >
+          <span class="font-mono text-[11.5px] text-[var(--faint)]">
             {{ visibleProjects.length }}
             {{
               visibleProjects.length === 1
@@ -242,9 +390,7 @@ onMounted(loadProjects)
         </div>
 
         <!-- Cards -->
-        <div
-          class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3"
-        >
+        <div class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           <BotCard
             v-for="project in visibleProjects"
             :key="project.id"
@@ -256,20 +402,14 @@ onMounted(loadProjects)
       <!-- Recently added -->
       <section
         v-if="!hasFilters && latestProjects.length"
-        class="mt-16"
+        class="mt-12 sm:mt-16"
       >
-        <div
-          class="flex items-end justify-between gap-4 border-b border-[var(--border)] pb-3"
-        >
-          <h2
-            class="font-display text-[22px] font-semibold tracking-[-0.01em] text-[var(--text)]"
-          >
+        <div class="flex items-end justify-between gap-4 border-b border-[var(--border)] pb-3">
+          <h2 class="font-display text-[22px] font-semibold tracking-[-0.01em] text-[var(--text)]">
             Recently added
           </h2>
 
-          <span
-            class="font-mono text-[11.5px] text-[var(--faint)]"
-          >
+          <span class="font-mono text-[11.5px] text-[var(--faint)]">
             newest listings first
           </span>
         </div>
@@ -297,28 +437,21 @@ onMounted(loadProjects)
             </div>
 
             <!-- Name / description -->
-            <div
-              class="min-w-0 flex-1 sm:flex sm:items-baseline sm:gap-3"
-            >
-              <h3
-                class="shrink-0 font-display text-[15px] font-semibold text-[var(--text)]"
-              >
+            <div class="min-w-0 flex-1 sm:flex sm:items-baseline sm:gap-3">
+              <h3 class="shrink-0 font-display text-[15px] font-semibold text-[var(--text)]">
                 {{ project.name }}
               </h3>
 
-              <p
-                class="mt-1 truncate text-[13.5px] text-[var(--muted)] sm:mt-0"
-              >
+              <p class="mt-1 truncate text-[13.5px] text-[var(--muted)] sm:mt-0">
                 {{ project.short_description }}
               </p>
             </div>
 
-            <!-- Category -->
+            <!-- Project type -->
             <span
-              v-if="project.categories.length"
               class="hidden shrink-0 rounded-lg bg-[var(--sunk)] px-2.5 py-1 text-[12px] text-[var(--muted)] md:inline-block"
             >
-              {{ project.categories[0].name }}
+              {{ project.project_type.name }}
             </span>
 
             <!-- Date -->
@@ -338,14 +471,12 @@ onMounted(loadProjects)
       v-else
       class="mt-12 rounded-[14px] border border-dashed border-[var(--border-strong)] bg-[var(--surface)] px-6 py-14 text-center"
     >
-      <p
-        class="font-display text-[15px] font-semibold text-[var(--text)]"
-      >
+      <p class="font-display text-[15px] font-semibold text-[var(--text)]">
         Nothing matched that
       </p>
 
       <p class="mt-2 text-sm text-[var(--muted)]">
-        Try a shorter keyword or another category.
+        Try a shorter keyword or different filters.
       </p>
 
       <button

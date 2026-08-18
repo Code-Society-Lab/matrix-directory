@@ -27,7 +27,7 @@ async function loadProject() {
     error.value =
       err instanceof Error
         ? err.message
-        : 'Could not load this bot.'
+        : 'Could not load this project.'
   } finally {
     loading.value = false
   }
@@ -46,7 +46,7 @@ onMounted(loadProject)
       v-if="loading"
       class="py-20 font-mono text-xs text-[var(--faint)]"
     >
-      Loading bot…
+      Loading project…
     </div>
 
     <!-- Error -->
@@ -107,14 +107,19 @@ onMounted(loadProject)
               {{ project.short_description }}
             </p>
 
-            <!-- Categories -->
+            <!-- Type and labels -->
             <div class="mt-4 flex flex-wrap gap-2">
               <span
-                v-for="category in project.categories"
-                :key="category.id"
+                class="rounded-[6px] bg-[var(--accent-soft)] px-2.5 py-1 text-[12px] font-medium text-[var(--accent-ink)]"
+              >
+                {{ project.project_type.name }}
+              </span>
+              <span
+                v-for="label in project.labels"
+                :key="label.id"
                 class="rounded-[6px] bg-[var(--sunk)] px-2.5 py-1 text-[12px] text-[var(--muted)]"
               >
-                {{ category.name }}
+                {{ label.name }}
               </span>
             </div>
           </div>
@@ -150,7 +155,7 @@ onMounted(loadProject)
         class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]"
       >
         <!-- Left -->
-        <div class="min-w-0">
+        <div>
           <!-- About -->
           <section>
             <h2
@@ -161,7 +166,7 @@ onMounted(loadProject)
 
             <MarkdownContent
               :source="project.description"
-              aria-label="Bot description"
+              aria-label="Project description"
               class="mt-4"
             />
           </section>
@@ -244,24 +249,37 @@ onMounted(loadProject)
             </span>
           </div>
 
-          <!-- Categories -->
+          <!-- Project type -->
           <div
             class="flex items-start justify-between gap-5 border-b border-[var(--border)] py-4"
           >
             <span
               class="text-[11.5px] uppercase tracking-[0.04em] text-[var(--faint)]"
             >
-              Categories
+              Project type
             </span>
 
             <span
               class="max-w-[170px] text-right font-mono text-[12px] leading-5 text-[var(--text)]"
             >
-              {{
-                project.categories
-                  .map((category) => category.name)
-                  .join(', ')
-              }}
+              {{ project.project_type.name }}
+            </span>
+          </div>
+
+          <!-- Labels -->
+          <div
+            class="flex items-start justify-between gap-5 border-b border-[var(--border)] py-4"
+          >
+            <span
+              class="text-[11.5px] uppercase tracking-[0.04em] text-[var(--faint)]"
+            >
+              Labels
+            </span>
+
+            <span
+              class="max-w-[170px] text-right font-mono text-[12px] leading-5 text-[var(--text)]"
+            >
+              {{ project.labels.map((label) => label.name).join(', ') || 'None' }}
             </span>
           </div>
 

@@ -1,4 +1,9 @@
-export type Category = {
+export type ProjectType = {
+  id: string
+  name: string
+}
+
+export type Label = {
   id: string
   name: string
 }
@@ -20,7 +25,8 @@ export type ProjectListItem = {
   matrix_server_url: string | null
   supports_e2ee: boolean
   user_id: string
-  categories: Category[]
+  project_type: ProjectType
+  labels: Label[]
   owner: ProjectOwner
   created_at: string
 }
@@ -35,5 +41,6 @@ export type ProjectCreate = {
   website_url: string | null
   matrix_server_url: string | null
   supports_e2ee: boolean
-  category_ids: string[]
+  project_type_id: string
+  label_ids: string[]
 }
