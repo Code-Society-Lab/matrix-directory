@@ -122,7 +122,7 @@ onMounted(loadProjects)
 <template>
   <main class="mx-auto max-w-[1120px] px-5 pb-24 sm:px-8">
     <!-- Hero -->
-    <section class="max-w-[860px] pb-8 pt-10 sm:pb-10 sm:pt-16">
+    <section class="max-w-[860px] pb-8 pt-10 sm:pb-8 sm:pt-14">
       <p class="font-mono text-xs font-medium uppercase tracking-[0.08em] text-[var(--accent-ink)]">
         Open directory · {{ projectCount }}
         {{ projectCount === 1 ? 'project' : 'projects' }}
@@ -137,18 +137,17 @@ onMounted(loadProjects)
           sm:text-[52px] sm:leading-[1.06]
         "
       >
-        Find tools for your Matrix project.
+        Find tools for Matrix.
       </h1>
 
       <p
         class="
-          mt-4 max-w-[580px]
+          mt-4 max-w-[680px]
           text-[15px] leading-6 text-[var(--muted)]
           sm:mt-5 sm:text-[17px] sm:leading-7
         "
       >
-        Discover bridges, moderation tools, games, and assistants
-        listed by the people who build them.
+        Discover bots, bridges, frameworks, and tools built by the Matrix community.
       </p>
     </section>
 
@@ -365,7 +364,7 @@ onMounted(loadProjects)
 
     <!-- Results -->
     <template v-else-if="visibleProjects.length">
-      <section class="mt-8 sm:mt-16">
+      <section class="mt-8 sm:mt-12">
         <!-- Section heading -->
         <div class="flex items-end justify-between gap-4 border-b border-[var(--border)] pb-3">
           <div>
