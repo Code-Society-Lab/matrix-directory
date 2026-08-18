@@ -28,6 +28,23 @@ const categories = computed(() =>
   ].sort(),
 )
 
+const latestProjects = computed(() =>
+  projects.value
+    .toSorted(
+      (a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime(),
+    )
+    .slice(0, 10),
+)
+
+function formatProjectDate(date: string) {
+  return new Intl.DateTimeFormat('en', {
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(date))
+}
+
 const visibleProjects = computed(() => {
   const normalizedQuery = query.value.trim().toLowerCase()
 
@@ -183,7 +200,7 @@ onMounted(loadProjects)
     <!-- Error -->
     <div
       v-if="error"
-      class="mt-8 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      class="mt-8 flex items-center gap-2 rounded-xl border border-[var(--danger-border)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]"
     >
       <ExclamationTriangleIcon class="size-4 shrink-0" />
       {{ error }}
@@ -238,7 +255,7 @@ onMounted(loadProjects)
 
       <!-- Recently added -->
       <section
-        v-if="!hasFilters"
+        v-if="!hasFilters && latestProjects.length"
         class="mt-16"
       >
         <div
@@ -257,21 +274,61 @@ onMounted(loadProjects)
           </span>
         </div>
 
-        <div
-          class="mt-5 rounded-[14px] border border-dashed border-[var(--border-strong)] bg-[var(--surface)] px-6 py-10 text-center"
-        >
-          <p
-            class="font-display text-sm font-semibold text-[var(--text)]"
+        <div class="mt-5">
+          <RouterLink
+            v-for="project in latestProjects"
+            :key="project.id"
+            :to="`/bots/${project.id}`"
+            class="
+              group flex min-h-[66px] items-center gap-4
+              rounded-b-[10px]
+              border-b border-[var(--border)]
+              px-2 py-3
+              transition
+              hover:bg-[var(--surface)]
+              sm:px-3
+            "
           >
-            Recent listings are coming soon
-          </p>
+            <!-- Initial -->
+            <div
+              class="grid size-11 shrink-0 place-items-center rounded-xl bg-[var(--sunk)] font-display text-[15px] font-semibold text-[var(--muted)]"
+            >
+              {{ project.name.charAt(0).toUpperCase() }}
+            </div>
 
-          <p
-            class="mx-auto mt-2 max-w-sm text-[13.5px] leading-5 text-[var(--muted)]"
-          >
-            Once listing dates are exposed by the API, the newest
-            additions to the directory will appear here.
-          </p>
+            <!-- Name / description -->
+            <div
+              class="min-w-0 flex-1 sm:flex sm:items-baseline sm:gap-3"
+            >
+              <h3
+                class="shrink-0 font-display text-[15px] font-semibold text-[var(--text)]"
+              >
+                {{ project.name }}
+              </h3>
+
+              <p
+                class="mt-1 truncate text-[13.5px] text-[var(--muted)] sm:mt-0"
+              >
+                {{ project.short_description }}
+              </p>
+            </div>
+
+            <!-- Category -->
+            <span
+              v-if="project.categories.length"
+              class="hidden shrink-0 rounded-lg bg-[var(--sunk)] px-2.5 py-1 text-[12px] text-[var(--muted)] md:inline-block"
+            >
+              {{ project.categories[0].name }}
+            </span>
+
+            <!-- Date -->
+            <time
+              :datetime="project.created_at"
+              class="hidden w-[72px] shrink-0 text-right font-mono text-[11.5px] text-[var(--faint)] sm:block"
+            >
+              {{ formatProjectDate(project.created_at) }}
+            </time>
+          </RouterLink>
         </div>
       </section>
     </template>
