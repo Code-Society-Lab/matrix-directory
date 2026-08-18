@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from app.routers.project_routers import router as projects_router
 from app.routers.auth_router import router as auth_router
 from app.routers.profile_router import router as profile_router
+from app.routers.category_router import router as categories_router
 from app.config import get_settings
 
 settings = get_settings()
@@ -39,10 +40,8 @@ app.add_middleware(
 
 app.include_router(projects_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
-app.include_router(
-    profile_router,
-    prefix="/api",
-)
+app.include_router(profile_router, prefix="/api")
+app.include_router(categories_router, prefix="/api")
 
 
 @app.get("/api/health", tags=["system"])
