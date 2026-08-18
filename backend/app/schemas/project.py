@@ -16,9 +16,6 @@ from .category import CategoryRead
 
 def normalize_optional_http_url(value: Any) -> Any:
     """Normalize blank URLs and reject non-HTTP(S) or relative URLs."""
-    if value is None:
-        return None
-
     if not isinstance(value, str):
         return value
 
