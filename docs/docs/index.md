@@ -128,7 +128,7 @@ profiles, project ownership, and directory data.
 
     ---
 
-    Publish a listing and understand project types, labels, and Markdown.
+    Publish a Matrix project and understand its fields, Markdown, and ownership.
 
     [:octicons-arrow-right-24: Read the submission guide](guides/submitting-a-project.md)
 

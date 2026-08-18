@@ -236,6 +236,7 @@ Changing `matrix_id` clears any existing verification. Clients cannot set
 
 ## Related documentation
 
+- [Project submission guide](../guides/submitting-a-project.md)
 - [Development guide](../development.md)
 - [Authentication architecture](../architecture/authentication.md)
 - [Interactive API documentation](https://matrix-directory.codesociety.xyz/api/docs)

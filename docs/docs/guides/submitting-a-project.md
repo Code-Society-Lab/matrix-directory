@@ -1,21 +1,38 @@
 # Submit a project
 
-Authenticated users can publish Matrix bots, SDKs, plugins, integrations, and
-other ecosystem projects directly from the directory.
+Authenticated users can publish Matrix bots, integrations, SDKs, and other
+ecosystem projects directly from the directory.
+
+## Before you start
+
+Prepare the following information:
+
+- A project name
+- A short summary for directory cards and search results
+- A longer description of what the project does and how to use it
+- At least one repository or project website
+- At least one category
+
+You may also provide a Matrix room and indicate whether the project supports
+end-to-end encrypted rooms.
+
+!!! note "Listings are public"
+    Do not include secrets, access tokens, private room links, or other
+    information that should not appear in the public directory.
 
 ## Publish a listing
 
 1. Sign in to Matrix Directory.
-2. Open your dashboard and select **Add listing**.
-3. Enter the project name, short description, and Markdown description.
-4. Provide at least one repository or website.
-5. Choose exactly one project type.
-6. Optionally choose labels and provide a Matrix room.
-7. Indicate whether the project operates in end-to-end encrypted rooms.
-8. Review the preview and select **Publish listing**.
+2. Open your dashboard.
+3. Select **Add listing**.
+4. Complete the required fields. The listing status panel shows which required
+   information is still missing.
+5. Review the directory-card preview.
+6. Select **Publish listing**.
 
-The listing is associated with the authenticated account and the application
-redirects to its public page after publication.
+The listing is associated with your authenticated account and published
+immediately. After a successful submission, the application redirects you to
+the new public listing.
 
 ## Types and labels
 
@@ -46,25 +63,51 @@ purpose.
 URLs must be absolute `http://` or `https://` URLs no longer than 255
 characters.
 
+At least one repository or website must remain on the listing when it is
+updated later.
+
 !!! note "Listings are public"
     Do not include secrets, access tokens, private room links, or other
     information that should not appear in the public directory.
 
-## Markdown
+## Markdown descriptions
 
-The About editor supports CommonMark headings, emphasis, lists, links, block
-quotes, code, and horizontal rules. Raw HTML is displayed as text.
+The **About** editor supports CommonMark formatting, including:
 
-Images embedded with Markdown are not rendered on saved listings. Image nodes
-are reduced to their alternative text so a listing cannot make visitors load
-content from an untrusted image host. Use a normal link for screenshots and
-diagrams.
+- Headings
+- Emphasis and strong emphasis
+- Ordered and unordered lists
+- Links
+- Block quotes
+- Inline and fenced code
+- Horizontal rules
 
-## Manage a listing
+Raw HTML is displayed as text rather than interpreted as page markup.
 
-Your dashboard lists projects owned by the current account. Ownership comes
-from the authenticated session and cannot be selected in the form. Only the
-owner may update or delete a listing.
+Images embedded with Markdown are not rendered on saved listings. When the
+Markdown is parsed, image nodes are reduced to their alternative text to
+prevent a listing from making visitors contact an untrusted image host. Use a
+normal link when readers need access to a screenshot or diagram.
 
-For request and response details, see the
+## Manage your listings
+
+Open the dashboard to see projects owned by your account. Ownership comes from
+your authenticated session; it cannot be assigned to another user through the
+submission form.
+
+Only an owner can update or delete their listing. Deleting a listing is
+permanent, so confirm that you selected the intended project before proceeding.
+
+## Troubleshooting
+
+If a listing cannot be published:
+
+- Check the listing status panel for missing required fields.
+- Confirm that every URL is absolute and begins with `http://` or `https://`.
+- Confirm that at least one repository or website is present.
+- Confirm that at least one category is selected.
+- Shorten any field that exceeds its displayed character limit.
+- Reload the page if categories could not be loaded.
+
+For API-level validation and response details, see the
 [HTTP API reference](../reference/api.md#create-a-project).
