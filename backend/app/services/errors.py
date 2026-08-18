@@ -1,4 +1,8 @@
-class CategoryNotFoundError(Exception):
+class LabelNotFoundError(Exception):
+    pass
+
+
+class ProjectTypeNotFoundError(Exception):
     pass
 
 

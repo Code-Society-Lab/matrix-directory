@@ -11,7 +11,8 @@ from pydantic import (
     model_validator,
 )
 
-from .category import CategoryRead
+from .label import LabelRead
+from .project_type import ProjectTypeRead
 
 
 def normalize_optional_http_url(value: Any) -> Any:
@@ -53,7 +54,8 @@ class ProjectCreate(BaseModel):
 
     supports_e2ee: bool = False
 
-    category_ids: list[UUID] = Field(min_length=1)
+    project_type_id: UUID
+    label_ids: list[UUID] = Field(default_factory=list)
 
     @field_validator(
         "name",
@@ -78,14 +80,14 @@ class ProjectCreate(BaseModel):
     def validate_optional_urls(cls, value: Any) -> Any:
         return normalize_optional_http_url(value)
 
-    @field_validator("category_ids")
+    @field_validator("label_ids")
     @classmethod
-    def reject_duplicate_categories(
+    def reject_duplicate_labels(
         cls,
         value: list[UUID],
     ) -> list[UUID]:
         if len(value) != len(set(value)):
-            raise ValueError("Categories must be unique")
+            raise ValueError("Labels must be unique")
 
         return value
 
@@ -123,10 +125,8 @@ class ProjectUpdate(BaseModel):
 
     supports_e2ee: bool | None = None
 
-    category_ids: list[UUID] | None = Field(
-        default=None,
-        min_length=1,
-    )
+    project_type_id: UUID | None = None
+    label_ids: list[UUID] | None = None
 
     @field_validator(
         "name",
@@ -151,14 +151,14 @@ class ProjectUpdate(BaseModel):
     def validate_optional_urls(cls, value: Any) -> Any:
         return normalize_optional_http_url(value)
 
-    @field_validator("category_ids")
+    @field_validator("label_ids")
     @classmethod
-    def reject_duplicate_categories(
+    def reject_duplicate_labels(
         cls,
         value: list[UUID] | None,
     ) -> list[UUID] | None:
         if value is not None and len(value) != len(set(value)):
-            raise ValueError("Categories must be unique")
+            raise ValueError("Labels must be unique")
 
         return value
 
@@ -167,7 +167,8 @@ class ProjectUpdate(BaseModel):
         "short_description",
         "description",
         "supports_e2ee",
-        "category_ids",
+        "project_type_id",
+        "label_ids",
         mode="before",
     )
     @classmethod
@@ -222,10 +223,11 @@ class ProjectRead(BaseModel):
 
     supports_e2ee: bool
 
+    project_type: ProjectTypeRead
+    labels: list[LabelRead] = Field(default_factory=list)
+
     user_id: UUID
     owner: ProjectOwnerRead
-
-    categories: list[CategoryRead] = Field(default_factory=list)
 
     created_at: datetime
     updated_at: datetime

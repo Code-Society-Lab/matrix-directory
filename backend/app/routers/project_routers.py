@@ -1,6 +1,7 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
-from uuid import UUID
 
 from app.database import get_session
 from app.dependencies import get_current_user
@@ -8,6 +9,11 @@ from app.models.project import Project
 from app.models.user import User
 from app.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
 from app.services import projects_service
+from app.services.errors import (
+    LabelNotFoundError,
+    ProjectLinkRequiredError,
+    ProjectTypeNotFoundError,
+)
 
 router = APIRouter(
     prefix="/projects",
@@ -58,7 +64,10 @@ def create_project(
 ) -> Project:
     try:
         return projects_service.create_project(session, data, user_id=user.id)
-    except projects_service.CategoryNotFoundError as exc:
+    except (
+        LabelNotFoundError,
+        ProjectTypeNotFoundError,
+    ) as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
@@ -80,8 +89,9 @@ def update_project(
             user_id=user.id,
         )
     except (
-        projects_service.CategoryNotFoundError,
-        projects_service.ProjectLinkRequiredError,
+        LabelNotFoundError,
+        ProjectLinkRequiredError,
+        ProjectTypeNotFoundError,
     ) as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

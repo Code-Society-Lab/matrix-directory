@@ -1,13 +1,12 @@
-from typing import Any, cast
-
-from sqlmodel import Session, select
 from uuid import UUID
 
-from app.models.category import Category
+from sqlmodel import Session, select
+
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectUpdate
 
-from .errors import CategoryNotFoundError, ProjectLinkRequiredError
+from . import labels_service, project_types_service
+from .errors import ProjectLinkRequiredError
 
 
 def list_projects(session: Session) -> list[Project]:
@@ -33,10 +32,8 @@ def create_project(
     *,
     user_id: UUID,
 ) -> Project:
-    if not data.category_ids:
-        raise ValueError("A project must have at least one category")
-
-    categories = _get_categories(session, data.category_ids)
+    project_type = project_types_service.get_project_type(session, data.project_type_id)
+    labels = labels_service.get_labels(session, data.label_ids)
 
     project = Project(
         name=data.name,
@@ -47,7 +44,8 @@ def create_project(
         matrix_server_url=data.matrix_server_url,
         supports_e2ee=data.supports_e2ee,
         user_id=user_id,
-        categories=categories,
+        project_type=project_type,
+        labels=labels,
     )
 
     session.add(project)
@@ -71,7 +69,7 @@ def update_project(
 
     update_data = data.model_dump(
         exclude_unset=True,
-        exclude={"category_ids"},
+        exclude={"project_type_id", "label_ids"},
     )
 
     repository_url = update_data.get("repository_url", project.repository_url)
@@ -81,17 +79,24 @@ def update_project(
             "Provide at least a repository URL or website URL"
         )
 
+    project_type = None
+    if data.project_type_id is not None:
+        project_type = project_types_service.get_project_type(
+            session, data.project_type_id
+        )
+
+    labels = None
+    if data.label_ids is not None:
+        labels = labels_service.get_labels(session, data.label_ids)
+
     for field, value in update_data.items():
         setattr(project, field, value)
 
-    if data.category_ids is not None:
-        if not data.category_ids:
-            raise ValueError("A project must have at least one category")
+    if project_type is not None:
+        project.project_type = project_type
 
-        project.categories = _get_categories(
-            session,
-            data.category_ids,
-        )
+    if labels is not None:
+        project.labels = labels
 
     session.add(project)
     session.commit()
@@ -123,21 +128,3 @@ def _get_owned_project(
     return session.exec(
         select(Project).where(Project.id == project_id, Project.user_id == user_id)
     ).first()
-
-
-def _get_categories(
-    session: Session,
-    category_ids: list[UUID],
-) -> list[Category]:
-    category_id_column = cast(Any, Category.id)
-    statement = select(Category).where(category_id_column.in_(category_ids))
-
-    categories = list(session.exec(statement).all())
-
-    if len(categories) != len(set(category_ids)):
-        found_ids = {category.id for category in categories}
-        missing_ids = set(category_ids) - found_ids
-
-        raise CategoryNotFoundError(f"Categories not found: {missing_ids}")
-
-    return categories

@@ -78,8 +78,9 @@ erDiagram
     USER ||--o| PROFILE : has
     USER ||--o{ AUTH_SESSION : authenticates_with
     USER ||--o{ PROJECT : owns
-    PROJECT ||--o{ PROJECT_CATEGORY : classified_by
-    CATEGORY ||--o{ PROJECT_CATEGORY : groups
+    PROJECT_TYPE ||--o{ PROJECT : classifies
+    PROJECT ||--o{ PROJECT_LABEL : tagged_with
+    LABEL ||--o{ PROJECT_LABEL : groups
 
     USER {
         UUID id PK
@@ -120,28 +121,35 @@ erDiagram
         string website_url "nullable"
         string matrix_server_url "nullable"
         UUID user_id FK
+        UUID project_type_id FK
         bool supports_e2ee
         datetime created_at
         datetime updated_at
     }
 
-    CATEGORY {
+    PROJECT_TYPE {
         UUID id PK
         string name UK
         datetime created_at
         datetime updated_at
     }
 
-    PROJECT_CATEGORY {
+    LABEL {
+        UUID id PK
+        string name UK
+        datetime created_at
+        datetime updated_at
+    }
+
+    PROJECT_LABEL {
         UUID project_id PK, FK
-        UUID category_id PK, FK
+        UUID label_id PK, FK
     }
 ```
 
-!!! note "Category invariant"
-    The database relationship permits a project to have zero or more category
-    rows. The API and project service enforce the stronger domain rule that a
-    project must be created and updated with at least one category.
+!!! note "Project classification"
+    Every project has exactly one required project type and may have zero or
+    more labels. Types describe what a project is; labels describe what it does.
 
 ## Login flow
 

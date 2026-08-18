@@ -83,6 +83,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Guides:
+      - Submit a project: guides/submitting-a-project.md
       - Development: development.md
   - Reference:
       - HTTP API: reference/api.md

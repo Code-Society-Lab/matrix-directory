@@ -124,6 +124,14 @@ profiles, project ownership, and directory data.
 
 <div class="grid cards" markdown>
 
+- :material-upload: **Submit a project**
+
+    ---
+
+    Publish a listing and understand project types, labels, and Markdown.
+
+    [:octicons-arrow-right-24: Read the submission guide](guides/submitting-a-project.md)
+
 - :fontawesome-solid-code: **Development**
 
     ---
