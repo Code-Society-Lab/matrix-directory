@@ -53,7 +53,7 @@ addopts = [
   "--strict-markers",
   "--cov=app",
   "--cov-report=term-missing",
-  "--cov-fail-under=65",
+  "--cov-fail-under=75",
 ]
 filterwarnings = [
   "error",

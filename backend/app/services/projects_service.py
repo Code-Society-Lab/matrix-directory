@@ -7,7 +7,7 @@ from app.models.category import Category
 from app.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectUpdate
 
-from .errors import CategoryNotFoundError
+from .errors import CategoryNotFoundError, ProjectLinkRequiredError
 
 
 def list_projects(session: Session) -> list[Project]:
@@ -73,6 +73,13 @@ def update_project(
         exclude_unset=True,
         exclude={"category_ids"},
     )
+
+    repository_url = update_data.get("repository_url", project.repository_url)
+    website_url = update_data.get("website_url", project.website_url)
+    if repository_url is None and website_url is None:
+        raise ProjectLinkRequiredError(
+            "Provide at least a repository URL or website URL"
+        )
 
     for field, value in update_data.items():
         setattr(project, field, value)
