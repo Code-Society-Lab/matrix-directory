@@ -8,6 +8,7 @@ import {
 } from '@heroicons/vue/24/outline'
 
 import { getProject } from '../api/client'
+import MarkdownContent from '../components/markdown/MarkdownContent.vue'
 import type { Project } from '../types/project'
 
 const route = useRoute()
@@ -51,7 +52,7 @@ onMounted(loadProject)
     <!-- Error -->
     <div
       v-else-if="error"
-      class="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      class="flex items-center gap-2 rounded-xl border border-[var(--danger-border)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]"
     >
       <ExclamationTriangleIcon class="size-4 shrink-0" />
       {{ error }}
@@ -158,40 +159,11 @@ onMounted(loadProject)
               About
             </h2>
 
-            <p
-              class="mt-4 whitespace-pre-line text-[15.5px] leading-7 text-[var(--text)]"
-            >
-              {{ project.description }}
-            </p>
-          </section>
-
-          <!-- Matrix server -->
-          <section class="mt-10">
-            <h2
-              class="font-mono text-xs font-medium uppercase tracking-[0.06em] text-[var(--faint)]"
-            >
-              Commands
-            </h2>
-
-            <div
-              class="mt-4 overflow-hidden rounded-[12px] border border-[var(--border)] bg-[var(--surface)]"
-            >
-              <div
-                class="mt-5 rounded-[14px] bg-[var(--surface)] px-6 py-10 text-center"
-              >
-                <p
-                  class="font-display text-sm font-semibold text-[var(--text)]"
-                >
-                  Bot commands are coming soon
-                </p>
-
-                <p
-                  class="mx-auto mt-2 max-w-sm text-[13.5px] leading-5 text-[var(--muted)]"
-                >
-                  Once available, you will be able to see the commands that this bot supports, along with their descriptions and usage examples.
-                </p>
-              </div>
-            </div>
+            <MarkdownContent
+              :source="project.description"
+              aria-label="Bot description"
+              class="mt-4"
+            />
           </section>
         </div>
 

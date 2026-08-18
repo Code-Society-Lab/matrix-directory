@@ -22,6 +22,18 @@ export type ProjectListItem = {
   user_id: string
   categories: Category[]
   owner: ProjectOwner
+  created_at: string
 }
 
 export type Project = ProjectListItem
+
+export type ProjectCreate = {
+  name: string
+  short_description: string
+  description: string
+  repository_url: string | null
+  website_url: string | null
+  matrix_server_url: string | null
+  supports_e2ee: boolean
+  category_ids: string[]
+}

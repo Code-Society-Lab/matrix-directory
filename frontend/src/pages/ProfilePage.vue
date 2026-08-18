@@ -12,6 +12,7 @@ import {
   type ProfileUpdate,
 } from '../api/client'
 import { currentUser } from '../auth'
+import MarkdownEditor from '../components/markdown/MarkdownEditor.vue'
 
 const user = ref<CurrentUser | null>(null)
 
@@ -27,6 +28,13 @@ const form = reactive<ProfileUpdate>({
   avatar_url: null,
   github_url: null,
   website_url: null,
+})
+
+const aboutYou = computed({
+  get: () => form.bio ?? '',
+  set: (value: string) => {
+    form.bio = value
+  },
 })
 
 const initials = computed(() => {
@@ -140,7 +148,7 @@ onMounted(load)
     <template v-else>
       <div
         v-if="error"
-        class="mt-8 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        class="mt-8 flex items-center gap-2 rounded-xl border border-[var(--danger-border)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]"
       >
         <ExclamationTriangleIcon class="size-4 shrink-0" />
         {{ error }}
@@ -243,7 +251,7 @@ onMounted(load)
           <label class="mt-5 block">
             <div class="flex items-center justify-between gap-4">
               <span class="text-[13px] font-medium text-[var(--text)]">
-                Bio
+                About you
               </span>
 
               <span class="font-mono text-[11px] text-[var(--faint)]">
@@ -251,12 +259,12 @@ onMounted(load)
               </span>
             </div>
 
-            <textarea
-              v-model="form.bio"
-              maxlength="1024"
-              rows="5"
+            <MarkdownEditor
+              v-model="aboutYou"
+              :maxlength="1024"
               placeholder="Tell people what you build and what you're interested in."
-              class="mt-2 w-full resize-y rounded-[10px] border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 py-3 text-sm leading-6 text-[var(--text)] outline-none transition focus:border-[var(--accent)] focus:ring-3 focus:ring-[var(--accent-soft)]"
+              aria-label="About you"
+              class="mt-2"
             />
           </label>
         </section>
@@ -342,7 +350,7 @@ onMounted(load)
           <button
             type="submit"
             :disabled="saving"
-            class="rounded-[9px] bg-[var(--accent)] px-5 py-2.5 text-sm font-medium text-[#0e1012] transition hover:bg-[var(--accent-deep)] disabled:cursor-not-allowed disabled:opacity-50"
+            class="rounded-[9px] bg-[var(--accent)] px-5 py-2.5 text-sm cursor-pointer font-medium text-[#0e1012] transition hover:bg-[var(--accent-deep)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {{ saving ? 'Saving…' : 'Save changes' }}
           </button>

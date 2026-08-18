@@ -1,9 +1,11 @@
+import pytest
 from sqlmodel import Session
 
 from app.models.category import Category
 from app.models.project import Project
 from app.models.user import User
 from app.schemas.project import ProjectUpdate
+from app.services.errors import ProjectLinkRequiredError
 from app.services.projects_service import delete_project, update_project
 
 
@@ -37,3 +39,31 @@ def test_project_writes__expect_only_owner_allowed(session: Session) -> None:
 
     assert delete_project(session, project.id, user_id=owner.id)
     assert session.get(Project, project.id) is None
+
+
+def test_project_update__expect_at_least_one_project_link(session: Session) -> None:
+    owner = User(oidc_issuer="issuer", oidc_subject="owner")
+    category = Category(name="Bots")
+    session.add_all([owner, category])
+    session.flush()
+    project = Project(
+        name="Test Bot",
+        description="Test bot",
+        short_description="Test bot",
+        repository_url="https://example.com/repository",
+        user_id=owner.id,
+        categories=[category],
+    )
+    session.add(project)
+    session.commit()
+
+    with pytest.raises(ProjectLinkRequiredError):
+        update_project(
+            session,
+            project.id,
+            ProjectUpdate(repository_url=None),
+            user_id=owner.id,
+        )
+
+    session.refresh(project)
+    assert project.repository_url == "https://example.com/repository"

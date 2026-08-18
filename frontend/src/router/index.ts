@@ -1,24 +1,30 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import BotDetailPage from '../pages/BotDetailPage.vue'
 import HomePage from '../pages/HomePage.vue'
 import LoginPage from '../pages/LoginPage.vue'
 import DashboardPage from '../pages/DashboardPage.vue'
-import ProfilePage from '../pages/ProfilePage.vue'
 import { authLoaded, currentUser, loadCurrentUser } from '../auth'
 
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', component: HomePage },
-    { path: '/bots/:id', component: BotDetailPage },
+    {
+      path: '/bots/:id',
+      component: () => import('../pages/BotDetailPage.vue'),
+    },
     { path: '/login', component: LoginPage },
     {
       path: '/profile',
-      component: ProfilePage,
+      component: () => import('../pages/ProfilePage.vue'),
       meta: { requiresAuth: true },
     },
     { path: '/dashboard', component: DashboardPage, meta: { requiresAuth: true } },
+    {
+      path: '/submit',
+      component: () => import('../pages/SubmitPage.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
   scrollBehavior: () => ({ top: 0 }),
 })
