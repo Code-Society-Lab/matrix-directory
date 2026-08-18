@@ -3,6 +3,8 @@
 /* -------------------------------------------------------------------------- */
 
 .markdown-editor {
+    min-width: 0;
+    max-width: 100%;
     overflow: visible;
 
     border: 1px solid var(--border-strong);
@@ -35,6 +37,9 @@
 /* -------------------------------------------------------------------------- */
 
 .markdown-editor .milkdown {
+    min-width: 0;
+    max-width: 100%;
+
     --crepe-color-background: var(--surface);
     --crepe-color-on-background: var(--text);
 
@@ -78,6 +83,9 @@
 /* -------------------------------------------------------------------------- */
 
 .markdown-editor .milkdown .ProseMirror {
+    min-width: 0;
+    max-width: 100%;
+
     color: var(--text);
 
     font-family: var(--font-sans);
@@ -204,7 +212,10 @@
 /* Code blocks */
 
 .markdown-editor .milkdown .ProseMirror pre {
+    box-sizing: border-box;
+    max-width: 100%;
     overflow-x: auto;
+    overscroll-behavior-inline: contain;
 
     margin: 1.25rem 0;
     border: 1px solid var(--border);
@@ -221,6 +232,16 @@
 
     overflow-wrap: normal;
     white-space: pre;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* Keep embedded content inside the document column on narrow screens. */
+
+.markdown-editor .milkdown .ProseMirror img {
+    max-width: 100%;
+    height: auto;
 }
 
 .markdown-editor .milkdown .ProseMirror pre code {

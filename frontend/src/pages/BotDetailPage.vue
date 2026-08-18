@@ -150,7 +150,7 @@ onMounted(loadProject)
         class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]"
       >
         <!-- Left -->
-        <div>
+        <div class="min-w-0">
           <!-- About -->
           <section>
             <h2
