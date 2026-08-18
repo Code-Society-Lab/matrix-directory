@@ -57,7 +57,7 @@ Application errors use a JSON `detail` field:
 
 | Status | Typical cause |
 | --- | --- |
-| `400 Bad Request` | A supplied category ID does not exist |
+| `400 Bad Request` | A category does not exist or an update would remove every project link |
 | `401 Unauthorized` | The session cookie is missing, invalid, or expired |
 | `404 Not Found` | The resource is missing or unavailable to its current user |
 | `422 Unprocessable Content` | The request body or path parameters are invalid |
@@ -99,8 +99,9 @@ GET /api/health
 
 ### Create a project
 
-A project requires at least one valid category. The authenticated user becomes
-the owner; there is no writable `user_id` field.
+A project requires at least one valid category and at least one repository or
+website. The authenticated user becomes the owner; there is no writable
+`user_id` field.
 
 ```json
 {
@@ -120,13 +121,13 @@ the owner; there is no writable `user_id` field.
 | Field | Required | Constraints |
 | --- | --- | --- |
 | `name` | Yes | 2–100 characters |
-| `description` | Yes | String |
-| `short_description` | Yes | At most 240 characters |
-| `repository_url` | No | String or `null` |
-| `website_url` | No | String or `null` |
-| `matrix_server_url` | No | String or `null` |
+| `description` | Yes | 1–10,000 characters; surrounding whitespace is removed |
+| `short_description` | Yes | 1–160 characters; surrounding whitespace is removed |
+| `repository_url` | Conditional | Absolute HTTP(S) URL up to 255 characters; required when `website_url` is absent |
+| `website_url` | Conditional | Absolute HTTP(S) URL up to 255 characters; required when `repository_url` is absent |
+| `matrix_server_url` | No | Absolute HTTP(S) URL up to 255 characters or `null` |
 | `supports_e2ee` | No | Boolean; defaults to `false` |
-| `category_ids` | Yes | Non-empty list of existing category UUIDs |
+| `category_ids` | Yes | Non-empty list of unique, existing category UUIDs |
 
 ### Update a project
 
@@ -141,7 +142,8 @@ the owner; there is no writable `user_id` field.
 
 The required project fields—`name`, `description`, `short_description`,
 `supports_e2ee`, and `category_ids`—may be omitted from a patch but cannot
-be explicitly set to `null`. URL fields may be cleared with `null`.
+be explicitly set to `null`. URL fields may be cleared with `null`, but an
+update cannot leave both `repository_url` and `website_url` empty.
 
 ### Project response
 
@@ -169,8 +171,27 @@ Project responses include public owner details and expanded categories:
       "id": "11111111-1111-1111-1111-111111111111",
       "name": "Bots"
     }
-  ]
+  ],
+  "created_at": "2026-08-18T12:00:00",
+  "updated_at": "2026-08-18T12:00:00"
 }
+```
+
+## Categories
+
+Categories are public reference data used by the submission form.
+
+| Method | Path | Access | Success | Description |
+| --- | --- | --- | --- | --- |
+| `GET` | `/api/categories/` | Public | `200 OK` | List categories alphabetically |
+
+```json
+[
+  {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "name": "Bots"
+  }
+]
 ```
 
 ## Authentication
@@ -215,6 +236,7 @@ Changing `matrix_id` clears any existing verification. Clients cannot set
 
 ## Related documentation
 
+- [Project submission guide](../guides/submitting-a-project.md)
 - [Development guide](../development.md)
 - [Authentication architecture](../architecture/authentication.md)
 - [Interactive API documentation](https://matrix-directory.codesociety.xyz/api/docs)
