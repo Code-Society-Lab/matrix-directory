@@ -1,0 +1,531 @@
+/* -------------------------------------------------------------------------- */
+/* Editor shell                                                               */
+/* -------------------------------------------------------------------------- */
+
+.markdown-editor {
+    overflow: visible;
+
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+
+    background: var(--surface);
+
+    transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.markdown-editor:not(.markdown-editor--readonly):focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.markdown-editor--invalid {
+    border-color: var(--danger);
+}
+
+.markdown-editor--invalid:not(.markdown-editor--readonly):focus-within {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px var(--danger-soft);
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Crepe theme                                                                */
+/* -------------------------------------------------------------------------- */
+
+.markdown-editor .milkdown {
+    --crepe-color-background: var(--surface);
+    --crepe-color-on-background: var(--text);
+
+    --crepe-color-surface: var(--sunk);
+    --crepe-color-surface-low: var(--hover);
+    --crepe-color-on-surface: var(--text);
+    --crepe-color-on-surface-variant: var(--muted);
+
+    --crepe-color-outline: var(--border-strong);
+    --crepe-color-selected: var(--accent-soft);
+
+    --crepe-color-primary: var(--accent-ink);
+    --crepe-color-secondary: var(--accent-soft);
+    --crepe-color-on-secondary: var(--text);
+
+    --crepe-color-inline-code: var(--text);
+    --crepe-color-inline-area: var(--sunk);
+
+    --crepe-font-default: var(--font-sans);
+    --crepe-font-title: var(--font-display);
+    --crepe-font-code: var(--font-mono);
+
+    background: transparent;
+}
+
+
+/* Selected editable blocks */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block.selected>.list-item,
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item.ProseMirror-selectednode {
+    border-radius: 6px;
+
+    background: color-mix(in oklch,
+            var(--accent-soft) 50%,
+            transparent);
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Shared document typography                                                 */
+/* -------------------------------------------------------------------------- */
+
+.markdown-editor .milkdown .ProseMirror {
+    color: var(--text);
+
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.7;
+
+    overflow-wrap: anywhere;
+    caret-color: var(--accent-deep);
+
+    outline: none;
+}
+
+
+/* Headings */
+
+.markdown-editor .milkdown .ProseMirror h1 {
+    margin: 1.75rem 0 0.75rem;
+
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.25;
+
+    letter-spacing: -0.025em;
+}
+
+.markdown-editor .milkdown .ProseMirror h2 {
+    margin: 1.5rem 0 0.65rem;
+
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.3;
+
+    letter-spacing: -0.015em;
+}
+
+.markdown-editor .milkdown .ProseMirror h3 {
+    margin: 1.3rem 0 0.55rem;
+
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.markdown-editor .milkdown .ProseMirror h4 {
+    margin: 1.15rem 0 0.5rem;
+
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.markdown-editor .milkdown .ProseMirror h5,
+.markdown-editor .milkdown .ProseMirror h6 {
+    margin: 1rem 0 0.45rem;
+
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+
+/* Paragraphs */
+
+.markdown-editor .milkdown .ProseMirror p {
+    margin: 0.5rem 0;
+}
+
+.markdown-editor .milkdown .ProseMirror>*:first-child {
+    margin-top: 0;
+}
+
+.markdown-editor .milkdown .ProseMirror>*:last-child {
+    margin-bottom: 0;
+}
+
+
+/* Strong and emphasized text */
+
+.markdown-editor .milkdown .ProseMirror strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+
+/* Links */
+
+.markdown-editor .milkdown .ProseMirror a {
+    color: var(--accent-ink);
+
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+
+    transition: text-decoration-thickness 120ms ease;
+}
+
+.markdown-editor .milkdown .ProseMirror a:hover {
+    text-decoration-thickness: 2px;
+}
+
+
+/* Inline code */
+
+.markdown-editor .milkdown .ProseMirror code {
+    display: inline;
+
+    border-radius: 4px;
+    background: var(--sunk);
+
+    padding: 0.12em 0.35em;
+
+    color: var(--text);
+
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    line-height: inherit;
+}
+
+
+/* Code blocks */
+
+.markdown-editor .milkdown .ProseMirror pre {
+    overflow-x: auto;
+
+    margin: 1.25rem 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    background: var(--sunk);
+    padding: 14px 16px;
+
+    color: var(--text);
+
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.65;
+
+    overflow-wrap: normal;
+    white-space: pre;
+}
+
+.markdown-editor .milkdown .ProseMirror pre code {
+    display: inline;
+
+    border: 0;
+    border-radius: 0;
+
+    background: transparent;
+    padding: 0;
+
+    color: inherit;
+
+    font-size: inherit;
+    line-height: inherit;
+}
+
+
+/* Blockquotes */
+
+.markdown-editor .milkdown .ProseMirror blockquote {
+    position: relative;
+
+    box-sizing: border-box;
+
+    margin: 1.25rem 0;
+    border-left: 2px solid color-mix(in oklch,
+            var(--accent) 55%,
+            var(--border));
+
+    padding: 0 0 0 1rem;
+
+    color: var(--muted);
+}
+
+/* Remove Crepe's default blockquote bar because the border above replaces it. */
+
+.markdown-editor .milkdown .ProseMirror blockquote::before {
+    content: none;
+}
+
+.markdown-editor .milkdown .ProseMirror blockquote>*:first-child {
+    margin-top: 0;
+}
+
+.markdown-editor .milkdown .ProseMirror blockquote>*:last-child {
+    margin-bottom: 0;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Lists: write mode                                                          */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Crepe renders editable list items using:
+ *
+ * .milkdown-list-item-block
+ *   > .list-item
+ *     > .label-wrapper
+ *     > .children
+ *       > [data-content-dom="true"]
+ *         > p
+ *
+ * Editable lists therefore use Crepe's marker column rather than native
+ * browser list markers.
+ */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror ul,
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror ol {
+    margin: 0.65rem 0;
+    padding-left: 0;
+
+    list-style: none;
+}
+
+
+/* List row */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    min-height: 32px;
+    margin: 0;
+}
+
+
+/* Marker column */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item>.label-wrapper {
+    display: flex;
+    flex: 0 0 24px;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 32px;
+
+    color: var(--faint);
+}
+
+
+/* Marker itself */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item>.label-wrapper>.label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 32px;
+
+    padding: 0;
+
+    color: var(--faint);
+
+    font-size: 0.95em;
+    line-height: 1;
+}
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item>.label-wrapper>.label.ordered {
+    justify-content: flex-end;
+
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* Editable content column */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item>.children {
+    flex: 1;
+
+    min-width: 0;
+}
+
+
+/*
+ * Milkdown inserts the actual ProseMirror content DOM inside `.children`.
+ * This is the selector that fixes the bullet/text alignment.
+ */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item>.children>[data-content-dom="true"] {
+    min-width: 0;
+}
+
+
+/*
+ * 24px line height + 4px top/bottom padding = the same 32px height as
+ * Crepe's marker wrapper.
+ */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item>.children>[data-content-dom="true"]>p {
+    min-height: 32px;
+
+    margin: 0;
+    padding: 4px 0;
+
+    line-height: 24px;
+}
+
+
+/* Additional paragraphs within one list item */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item>.children>[data-content-dom="true"]>p+p {
+    margin-top: 0.25rem;
+}
+
+
+/* Nested editable lists */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item>.children>[data-content-dom="true"]>ul,
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror .milkdown-list-item-block>.list-item>.children>[data-content-dom="true"]>ol {
+    margin: 0.25rem 0 0;
+    padding-left: 2rem;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Lists: read-only mode                                                      */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Read-only rendering does not need Crepe's editable marker column.
+ * Use normal semantic list markers so published content behaves like
+ * ordinary documentation.
+ */
+
+.markdown-editor--readonly .milkdown .ProseMirror ul,
+.markdown-editor--readonly .milkdown .ProseMirror ol {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+}
+
+.markdown-editor--readonly .milkdown .ProseMirror ul {
+    list-style-type: disc;
+}
+
+.markdown-editor--readonly .milkdown .ProseMirror ol {
+    list-style-type: decimal;
+}
+
+.markdown-editor--readonly .milkdown .ProseMirror li {
+    margin: 0.2rem 0;
+    padding-left: 0.15rem;
+}
+
+.markdown-editor--readonly .milkdown .ProseMirror li::marker {
+    color: var(--faint);
+}
+
+.markdown-editor--readonly .milkdown .ProseMirror li>p {
+    margin: 0;
+}
+
+.markdown-editor--readonly .milkdown .ProseMirror li>ul,
+.markdown-editor--readonly .milkdown .ProseMirror li>ol {
+    margin: 0.25rem 0;
+}
+
+
+/* Horizontal rules */
+
+.markdown-editor .milkdown .ProseMirror hr {
+    height: 1px;
+
+    margin: 1.75rem 0;
+    border: 0;
+
+    background: var(--border);
+    padding: 0;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Write mode                                                                 */
+/* -------------------------------------------------------------------------- */
+
+.markdown-editor:not(.markdown-editor--readonly) .milkdown .ProseMirror {
+    min-height: 180px;
+    padding: 14px;
+}
+
+
+/* Placeholder */
+
+.markdown-editor .milkdown .ProseMirror p.is-editor-empty:first-child::before {
+    color: var(--faint);
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Read-only mode                                                             */
+/* -------------------------------------------------------------------------- */
+
+.markdown-editor--readonly {
+    border: 0;
+    border-radius: 0;
+
+    background: transparent;
+}
+
+.markdown-editor--readonly:focus-within {
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.markdown-editor--readonly .milkdown {
+    background: transparent;
+}
+
+.markdown-editor--readonly .milkdown .ProseMirror {
+    min-height: 0;
+    padding: 0;
+
+    caret-color: transparent;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Validation                                                                 */
+/* -------------------------------------------------------------------------- */
+
+.markdown-editor__limit {
+    margin: 0;
+    border-top: 1px solid var(--danger-border);
+
+    background: var(--danger-soft);
+    padding: 8px 14px;
+
+    color: var(--danger);
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Motion preferences                                                         */
+/* -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .markdown-editor,
+    .markdown-editor .milkdown .ProseMirror a {
+        transition: none;
+    }
+}
