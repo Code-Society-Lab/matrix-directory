@@ -190,7 +190,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-6xl px-5 pb-24 pt-8 sm:px-8">
+  <main class="mx-auto max-w-[1120px] px-5 py-10 pb-24 sm:px-8">
     <RouterLink
       to="/dashboard"
       class="inline-flex items-center gap-2 font-mono text-[12px] text-[var(--muted)] no-underline transition hover:text-[var(--text)]"

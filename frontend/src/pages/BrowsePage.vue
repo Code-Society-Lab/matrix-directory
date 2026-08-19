@@ -112,9 +112,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main
-    class="mx-auto mt-8 min-h-[calc(100vh-68px)] min-w-0 max-w-[1120px] px-5 sm:px-8"
-  >
+  <main class="mx-auto max-w-[1120px] px-5 py-10 pb-24 sm:px-8">
     <!-- SearchFilter -->
     <SearchFilter
       v-model:query="query"

@@ -46,9 +46,7 @@ onMounted(loadProject)
 </script>
 
 <template>
-  <main
-    class="mx-auto w-full max-w-[1120px] px-5 pb-24 pt-8 sm:px-8"
-  >
+  <main class="mx-auto max-w-[1120px] px-5 py-10 pb-24 sm:px-8">
     <!-- Loading -->
     <div
       v-if="loading"
