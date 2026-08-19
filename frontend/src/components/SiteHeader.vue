@@ -17,7 +17,6 @@ import { currentUser, logout } from '../auth'
 
 import logoUrl from '../assets/matrix-directory-mark.svg'
 
-
 const docsUrl =
   import.meta.env.VITE_DOCS_URL ??
   (import.meta.env.DEV ? 'http://127.0.0.1:8001' : '/docs/')
@@ -73,10 +72,6 @@ const profileLabel = computed(() =>
 )
 
 function isActive(path: string) {
-  if (path === '/') {
-    return route.path === '/'
-  }
-
   return route.path.startsWith(path)
 }
 
@@ -126,10 +121,10 @@ watch(
       <!-- Desktop navigation -->
       <nav class="hidden items-center gap-1 sm:flex">
         <RouterLink
-          to="/"
+          to="/browse"
           class="rounded-lg px-3 py-2 text-sm no-underline transition"
           :class="
-            isActive('/')
+            isActive('/browse')
               ? 'bg-[var(--sunk)] font-medium text-[var(--text)]'
               : 'text-[var(--muted)] hover:bg-[var(--sunk)] hover:text-[var(--text)]'
           "
@@ -139,8 +134,6 @@ watch(
 
         <a
           :href="docsUrl"
-          target="_blank"
-          rel="noopener noreferrer"
           class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-[var(--muted)] no-underline transition hover:bg-[var(--sunk)] hover:text-[var(--text)]"
         >
           Docs
@@ -284,10 +277,10 @@ watch(
           <!-- Links -->
           <nav class="p-2">
             <RouterLink
-              to="/"
+              to="/browse"
               class="flex rounded-[8px] px-3 py-2.5 text-sm no-underline transition"
               :class="
-                isActive('/')
+                isActive('/browse')
                   ? 'bg-[var(--sunk)] font-medium text-[var(--text)]'
                   : 'text-[var(--muted)] hover:bg-[var(--sunk)] hover:text-[var(--text)]'
               "

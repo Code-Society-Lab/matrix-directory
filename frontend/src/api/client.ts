@@ -76,8 +76,27 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export function listProjects() {
-  return request<ProjectListItem[]>('/projects/')
+type ProjectQuery = {
+  query?: string
+  projectType?: string
+  label?: string
+  limit?: number
+  offset?: number
+}
+
+export function listProjects(filters: ProjectQuery = {}) {
+  const params = new URLSearchParams()
+
+  if (filters.query) params.set('q', filters.query)
+  if (filters.projectType) params.set('project_type', filters.projectType)
+  if (filters.label) params.set('label', filters.label)
+  if (filters.limit !== undefined) params.set('limit', String(filters.limit))
+  if (filters.offset !== undefined) params.set('offset', String(filters.offset))
+
+  const queryString = params.toString()
+  const path = queryString ? `/projects/?${queryString}` : '/projects/'
+
+  return request<ProjectListItem[]>(path)
 }
 
 export function getProject(id: string) {
@@ -109,6 +128,20 @@ export function deleteProject(id: string) {
   return request<void>(`/projects/${id}`, {
     method: 'DELETE',
   })
+}
+
+export function listRandomProjects(limit = 6) {
+  const params = new URLSearchParams({
+    limit: String(limit),
+  })
+
+  return request<ProjectListItem[]>(
+    `/projects/random/?${params.toString()}`,
+  )
+}
+
+export function countProjects() {
+  return request<number>('/projects/count/')
 }
 
 export function listProjectTypes() {
