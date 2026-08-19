@@ -50,7 +50,7 @@ theme:
     - toc.follow
   icon:
     repo: fontawesome/brands/github-alt
-  logo: img/matrix-directory-mark.svg
+  logo: img/matrix-directory-mark-light.svg
   favicon: img/favicon.svg
 plugins:
   - search

@@ -6,8 +6,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/vue/24/outline'
 
-import logoUrl from '../assets/matrix-directory-mark.svg'
-
+import MatrixLogo from '../components/MatrixLogo.vue'
 const route = useRoute()
 
 const loginUrl =
@@ -16,7 +15,7 @@ const loginUrl =
 
 <template>
   <main
-    class="mx-auto flex min-h-[calc(100vh-68px)] max-w-[1120px] items-start justify-center px-5 pb-24 pt-16 sm:px-8 sm:pt-24"
+    class="mx-auto flex max-w-[1120px] items-start justify-center px-5 pb-24 pt-16 sm:px-8 sm:pt-24"
   >
     <div class="w-full max-w-[480px]">
       <!-- Heading -->
@@ -61,12 +60,8 @@ const loginUrl =
       >
         <div class="p-6 sm:p-7">
           <div class="flex items-start gap-4">
-            <!-- Matrix Directory Logo -->
-            <img
-              :src="logoUrl"
-              alt="Matrix Directory Logo"
-              class="size-[45px] text-[var(--accent-ink)]"
-            >
+            <!-- Matrix Logo -->
+            <MatrixLogo class="size-12 sm:size-16" />
 
             <div>
               <h2

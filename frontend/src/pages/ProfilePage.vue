@@ -119,7 +119,7 @@ onMounted(load)
 </script>
 
 <template>
-  <main class="mx-auto max-w-[1120px] px-5 py-10 sm:px-8">
+  <main class="mx-auto max-w-[1120px] px-5 py-10 pb-24 sm:px-8">
     <div class="max-w-2xl">
       <p
         class="font-mono text-xs font-medium uppercase tracking-[0.08em] text-[var(--accent-ink)]"

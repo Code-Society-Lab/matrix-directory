@@ -15,7 +15,7 @@ import {
 
 import { currentUser, logout } from '../auth'
 
-import logoUrl from '../assets/matrix-directory-mark.svg'
+import BrandLogo from './BrandLogo.vue'
 
 const docsUrl =
   import.meta.env.VITE_DOCS_URL ??
@@ -103,11 +103,7 @@ watch(
         to="/"
         class="flex min-w-0 items-center gap-2.5 no-underline"
       >
-        <img
-          :src="logoUrl"
-          alt="Matrix Directory Logo"
-          class="size-[30px] text-[var(--accent-ink)]"
-        >
+        <BrandLogo class="size-7.5 text-[var(--text)] transition-colors hover:text-[var(--text)]" />
 
         <div class="flex min-w-0 items-baseline gap-2">
           <span
