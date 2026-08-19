@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import { CheckIcon } from '@heroicons/vue/24/outline'
 
 import type { ProjectListItem } from '../types/project'
+import { projectPath } from '../utils/projectRoutes'
 
 const props = defineProps<{
   project: ProjectListItem
@@ -36,7 +37,7 @@ const ownerInitial = computed(() =>
 
 <template>
   <RouterLink
-    :to="`/bots/${project.id}`"
+    :to="projectPath(project)"
     class="
       group block rounded-[14px]
       border border-[var(--border)]

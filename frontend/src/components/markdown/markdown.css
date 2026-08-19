@@ -503,6 +503,8 @@
     border-radius: 0;
 
     background: transparent;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
 }
 
 .markdown-editor--readonly:focus-within {

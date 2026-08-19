@@ -8,6 +8,7 @@ import {
 
 import { deleteProject, listMyProjects } from '../api/client'
 import type { ProjectListItem } from '../types/project'
+import { projectPath } from '../utils/projectRoutes'
 
 const projects = ref<ProjectListItem[]>([])
 const loading = ref(true)
@@ -130,7 +131,7 @@ onMounted(load)
         >
           <!-- Initial -->
           <RouterLink
-            :to="`/bots/${project.id}`"
+            :to="projectPath(project)"
             class="grid size-11 shrink-0 place-items-center rounded-[11px] bg-[var(--accent-soft)] font-display text-base font-semibold text-[var(--accent-ink)] no-underline"
           >
             {{ project.name.charAt(0).toUpperCase() }}
@@ -140,7 +141,7 @@ onMounted(load)
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-3">
               <RouterLink
-                :to="`/bots/${project.id}`"
+                :to="projectPath(project)"
                 class="truncate font-display text-[15px] font-semibold tracking-[-0.01em] text-[var(--text)] no-underline hover:text-[var(--accent-ink)]"
               >
                 {{ project.name }}
@@ -157,7 +158,7 @@ onMounted(load)
           <!-- Actions -->
           <div class="flex shrink-0 items-center gap-2">
             <RouterLink
-              :to="`/bots/${project.id}`"
+              :to="projectPath(project)"
               class="hidden rounded-[8px] px-3 py-2 font-mono text-[11.5px] text-[var(--muted)] no-underline transition hover:bg-[var(--sunk)] hover:text-[var(--text)] sm:block"
             >
               View
