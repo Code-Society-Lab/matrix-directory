@@ -15,10 +15,9 @@ import {
 } from '../api/client'
 import MarkdownEditor from '../components/markdown/MarkdownEditor.vue'
 import type { Label, ProjectCreate, ProjectType } from '../types/project'
+import { projectPath } from '../utils/projectRoutes'
 
 const router = useRouter()
-
-
 const form = reactive<ProjectCreate>({
   name: '',
   short_description: '',
@@ -149,7 +148,7 @@ async function submit() {
       matrix_server_url: optionalValue(form.matrix_server_url),
     })
 
-    await router.push(`/bots/${created.id}`)
+    await router.push(projectPath(created))
   } catch (error) {
     if (error instanceof ApiError && error.issues.length) {
       for (const issue of error.issues) {
