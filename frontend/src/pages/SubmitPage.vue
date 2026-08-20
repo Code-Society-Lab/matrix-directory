@@ -1,192 +1,46 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowLeftIcon,
   ExclamationTriangleIcon,
   LockClosedIcon,
 } from '@heroicons/vue/24/outline'
 
-import {
-  ApiError,
-  createProject,
-  listLabels,
-  listProjectTypes,
-} from '../api/client'
 import MarkdownEditor from '../components/markdown/MarkdownEditor.vue'
-import type { Label, ProjectCreate, ProjectType } from '../types/project'
-import { projectPath } from '../utils/projectRoutes'
+import { useProjectForm } from '../composables/useProjectForm'
 
 const router = useRouter()
-const form = reactive<ProjectCreate>({
-  name: '',
-  short_description: '',
-  description: '',
-  repository_url: null,
-  website_url: null,
-  matrix_server_url: null,
-  supports_e2ee: false,
-  project_type_id: '',
-  label_ids: [],
-})
-
-const projectTypes = ref<ProjectType[]>([])
-const labels = ref<Label[]>([])
-const loadingClassifications = ref(true)
-const submitting = ref(false)
-const formError = ref('')
-const fieldErrors = ref<Record<string, string>>({})
-
-const selectedLabels = computed(() =>
-  labels.value.filter((label) =>
-    form.label_ids.includes(label.id),
-  ),
+const route = useRoute()
+const editingProjectId = computed(() =>
+  typeof route.params.id === 'string' ? route.params.id : '',
 )
+const {
+  cannotSubmit,
+  checklist,
+  fieldError,
+  form,
+  formError,
+  isEditing,
+  labels,
+  load,
+  loadingClassifications,
+  loadingProject,
+  projectReady,
+  projectTypes,
+  projectUnavailable,
+  requiredChecklist,
+  requiredCompleteCount,
+  selectedLabels,
+  submit,
+  submitting,
+} = useProjectForm(router, editingProjectId)
 
 const previewInitial = computed(() =>
   form.name.trim().charAt(0).toUpperCase() || '?',
 )
 
-const hasProjectLink = computed(() =>
-  Boolean(
-    form.repository_url?.trim() ||
-    form.website_url?.trim(),
-  ),
-)
-
-const cannotSubmit = computed(() =>
-  submitting.value ||
-  loadingClassifications.value ||
-  !form.name.trim() ||
-  !form.short_description.trim() ||
-  !form.description.trim() ||
-  !form.project_type_id ||
-  !hasProjectLink.value ||
-  form.short_description.length > 160 ||
-  form.description.length > 10000,
-)
-
-const checklist = computed(() => [
-  {
-    label: 'Name',
-    complete: Boolean(form.name.trim()),
-    required: true,
-  },
-  {
-    label: 'Short description',
-    complete: Boolean(form.short_description.trim()),
-    required: true,
-  },
-  {
-    label: 'About',
-    complete: Boolean(form.description.trim()),
-    required: true,
-  },
-  {
-    label: 'Project link',
-    complete: hasProjectLink.value,
-    required: true,
-  },
-  {
-    label: 'Project type',
-    complete: Boolean(form.project_type_id),
-    required: true,
-  },
-  {
-    label: 'Labels',
-    complete: form.label_ids.length > 0,
-    required: false,
-  },
-  {
-    label: 'Matrix room',
-    complete: Boolean(form.matrix_server_url?.trim()),
-    required: false,
-  },
-  {
-    label: 'E2EE support',
-    complete: form.supports_e2ee,
-    required: false,
-  },
-])
-
-const requiredChecklist = computed(() =>
-  checklist.value.filter((item) => item.required),
-)
-
-const requiredCompleteCount = computed(() =>
-  requiredChecklist.value.filter((item) => item.complete).length,
-)
-
-const listingReady = computed(() =>
-  requiredChecklist.value.every((item) => item.complete),
-)
-
-function optionalValue(value: string | null) {
-  const normalized = value?.trim()
-  return normalized || null
-}
-
-function fieldError(field: string) {
-  return fieldErrors.value[field]
-}
-
-async function submit() {
-  if (cannotSubmit.value) return
-
-  submitting.value = true
-  formError.value = ''
-  fieldErrors.value = {}
-
-  try {
-    const created = await createProject({
-      ...form,
-      name: form.name.trim(),
-      short_description: form.short_description.trim(),
-      description: form.description.trim(),
-      repository_url: optionalValue(form.repository_url),
-      website_url: optionalValue(form.website_url),
-      matrix_server_url: optionalValue(form.matrix_server_url),
-    })
-
-    await router.push(projectPath(created))
-  } catch (error) {
-    if (error instanceof ApiError && error.issues.length) {
-      for (const issue of error.issues) {
-        const field = String(issue.loc.at(-1))
-
-        fieldErrors.value[field] = issue.msg.replace(
-          /^Value error, /,
-          '',
-        )
-      }
-    } else {
-      formError.value =
-        error instanceof Error
-          ? error.message
-          : 'Could not publish the listing.'
-    }
-  } finally {
-    submitting.value = false
-  }
-}
-
-onMounted(async () => {
-  try {
-    const [availableProjectTypes, availableLabels] = await Promise.all([
-      listProjectTypes(),
-      listLabels(),
-    ])
-    projectTypes.value = availableProjectTypes
-    labels.value = availableLabels
-  } catch (error) {
-    formError.value =
-      error instanceof Error
-        ? error.message
-        : 'Could not load project classifications.'
-  } finally {
-    loadingClassifications.value = false
-  }
-})
+onMounted(load)
 </script>
 
 <template>
@@ -204,18 +58,23 @@ onMounted(async () => {
       <p
         class="font-mono text-xs font-medium uppercase tracking-[0.08em] text-[var(--accent-ink)]"
       >
-        Directory listing
+        Directory project
       </p>
 
       <h1
         class="mt-3 font-display text-[34px] font-semibold tracking-[-0.025em] text-[var(--text)]"
       >
-        Submit a project
+        {{ isEditing ? 'Edit project' : 'Submit a project' }}
       </h1>
 
       <p class="mt-2 text-[15px] leading-6 text-[var(--muted)]">
-        Add a Matrix bot or integration to the public directory.
-        You can update these details later.
+        <template v-if="isEditing">
+          Update the information shown in the public directory.
+        </template>
+        <template v-else>
+          Add a Matrix project to the public directory.
+          You can update these details later.
+        </template>
       </p>
     </header>
 
@@ -229,7 +88,15 @@ onMounted(async () => {
       {{ formError }}
     </div>
 
+    <p
+      v-if="loadingProject"
+      class="mt-8 font-mono text-xs text-[var(--faint)]"
+    >
+      Loading project...
+    </p>
+
     <form
+      v-if="!loadingProject && !projectUnavailable"
       class="mt-10 grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_320px]"
       @submit.prevent="submit"
     >
@@ -648,7 +515,11 @@ onMounted(async () => {
             :disabled="cannotSubmit"
             class="rounded-[9px] bg-[var(--accent)] px-5 py-2.5 text-sm font-medium text-[#0e1012] transition hover:bg-[var(--accent-deep)] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {{ submitting ? 'Publishing…' : 'Publish listing' }}
+            {{
+              submitting
+                ? (isEditing ? 'Saving…' : 'Publishing…')
+                : (isEditing ? 'Save changes' : 'Publish project')
+            }}
           </button>
         </footer>
       </div>
@@ -661,13 +532,13 @@ onMounted(async () => {
             <p
               class="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--faint)]"
             >
-              Listing preview
+              Project preview
             </p>
 
             <span
               class="font-mono text-[10px] uppercase tracking-[0.06em] text-[var(--faint)]"
             >
-              Draft
+              {{ isEditing ? 'Current project' : 'Draft' }}
             </span>
           </div>
 
@@ -748,7 +619,7 @@ onMounted(async () => {
             the directory.
           </p>
 
-          <!-- Listing readiness -->
+          <!-- Project readiness -->
           <div
             class="mt-8 border-t border-[var(--border)] pt-5"
           >
@@ -756,11 +627,11 @@ onMounted(async () => {
               <p
                 class="font-mono text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--faint)]"
               >
-                Listing status
+                Project status
               </p>
 
               <span
-                v-if="listingReady"
+                v-if="projectReady"
                 class="font-mono text-[10px] font-medium uppercase tracking-[0.04em] text-[var(--success)]"
               >
                 Ready

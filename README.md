@@ -24,7 +24,7 @@
 Matrix Directory is a community-driven web application for discovering projects
 in the Matrix ecosystem, including bots, frameworks, SDKs, and other tools.
 
-It provides a Vue frontend for discovering and managing listings and a FastAPI
+It provides a Vue frontend for discovering and managing projects and a FastAPI
 backend for authentication, profiles, project ownership, and directory data.
 
 ## Tech stack

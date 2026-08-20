@@ -36,7 +36,7 @@ const loginUrl =
           class="mt-3 text-[15px] leading-6 text-[var(--muted)]"
         >
           Sign in securely using your Matrix account to manage your
-          profile and directory listings.
+          profile and your projects.
         </p>
       </div>
 

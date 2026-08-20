@@ -154,7 +154,7 @@ onMounted(() => void loadHomepage())
         </h2>
 
         <span class="font-mono text-[11.5px] text-[var(--faint)]">
-          newest listings first
+          newest projects first
         </span>
       </div>
 

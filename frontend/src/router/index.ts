@@ -26,6 +26,11 @@ export const router = createRouter({
       ],
       component: () => import('../pages/ProjectDetailPage.vue'),
     },
+    {
+      path: '/projects/:id/edit',
+      component: () => import('../pages/SubmitPage.vue'),
+      meta: { requiresAuth: true },
+    },
     { path: '/login', component: LoginPage },
     {
       path: '/profile',

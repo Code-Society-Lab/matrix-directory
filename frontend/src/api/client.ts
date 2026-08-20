@@ -158,3 +158,10 @@ export function createProject(input: ProjectCreate) {
     body: JSON.stringify(input),
   })
 }
+
+export function updateProject(id: string, input: ProjectCreate) {
+  return request<Project>(`/projects/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
+}
