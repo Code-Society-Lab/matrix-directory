@@ -29,6 +29,7 @@ export type ProjectListItem = {
   labels: Label[]
   owner: ProjectOwner
   created_at: string
+  updated_at: string
 }
 
 export type Project = ProjectListItem
