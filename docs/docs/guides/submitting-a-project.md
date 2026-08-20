@@ -16,31 +16,31 @@ Prepare the following information:
 You may also provide a Matrix room and indicate whether the project supports
 end-to-end encrypted rooms.
 
-!!! note "Listings are public"
+!!! note "Projects are public"
     Do not include secrets, access tokens, private room links, or other
     information that should not appear in the public directory.
 
-## Publish a listing
+## Publish a project
 
 1. Sign in to Matrix Directory.
 2. Open your dashboard.
-3. Select **Add listing**.
-4. Complete the required fields. The listing status panel shows which required
+3. Select **Add project**.
+4. Complete the required fields. The project status panel shows which required
    information is still missing.
 5. Review the directory-card preview.
-6. Select **Publish listing**.
+6. Select **Publish project**.
 
-The listing is associated with your authenticated account and published
+A project is associated with your authenticated account and published
 immediately. After a successful submission, the application redirects you to
-the new public listing.
+the new public view of the project.
 
 ## Types and labels
 
-A project type describes what the project **is**. Every listing has exactly
+A project type describes what the project **is**. Every project has exactly
 one of the initial directory types: **Bot**, **SDK**, **Framework**,
 **Bridges**, **Clients**, **Server**, or **Integrations**.
 
-Labels describe what the project **does**. A listing may have any number of
+Labels describe what the project **does**. A project may have any number of
 labels, including none. Examples include **Dev tools** and **Utility**.
 
 This separation lets visitors filter by both the project format and its
@@ -63,10 +63,10 @@ purpose.
 URLs must be absolute `http://` or `https://` URLs no longer than 255
 characters.
 
-At least one repository or website must remain on the listing when it is
+At least one repository or website must remain on the project when it is
 updated later.
 
-!!! note "Listings are public"
+!!! note "Projects are public"
     Do not include secrets, access tokens, private room links, or other
     information that should not appear in the public directory.
 
@@ -84,25 +84,25 @@ The **About** editor supports CommonMark formatting, including:
 
 Raw HTML is displayed as text rather than interpreted as page markup.
 
-Images embedded with Markdown are not rendered on saved listings. When the
+Images embedded with Markdown are not rendered on saved projects. When the
 Markdown is parsed, image nodes are reduced to their alternative text to
-prevent a listing from making visitors contact an untrusted image host. Use a
+prevent a project from making visitors contact an untrusted image host. Use a
 normal link when readers need access to a screenshot or diagram.
 
-## Manage your listings
+## Manage your projects
 
 Open the dashboard to see projects owned by your account. Ownership comes from
 your authenticated session; it cannot be assigned to another user through the
 submission form.
 
-Only an owner can update or delete their listing. Deleting a listing is
+Only an owner can update or delete their project. Deleting a project is
 permanent, so confirm that you selected the intended project before proceeding.
 
 ## Troubleshooting
 
-If a listing cannot be published:
+If a project cannot be published:
 
-- Check the listing status panel for missing required fields.
+- Check the project status panel for missing required fields.
 - Confirm that every URL is absolute and begins with `http://` or `https://`.
 - Confirm that at least one repository or website is present.
 - Confirm that at least one category is selected.

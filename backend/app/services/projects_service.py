@@ -89,7 +89,14 @@ def list_random_projects(
 
 
 def list_projects_for_user(session: Session, *, user_id: UUID) -> list[Project]:
-    statement = select(Project).where(Project.user_id == user_id)
+    statement = (
+        select(Project)
+        .where(Project.user_id == user_id)
+        .order_by(
+            col(Project.updated_at).desc(),
+            col(Project.created_at).desc(),
+        )
+    )
     return list(session.exec(statement).all())
 
 
