@@ -15,7 +15,7 @@ from app.dependencies import get_current_user
 from app.models.label import Label
 from app.models.project_type import ProjectType
 from app.models.user import User
-from app.routers.project_routers import router
+from app.routers.project_router import router
 from app.schemas.project import ProjectCreate, ProjectUpdate
 
 
@@ -176,6 +176,17 @@ def test_list_projects__expect_server_side_search_and_filters(
 
     assert response.status_code == 200
     assert [project["name"] for project in response.json()] == ["Alpha Bridge"]
+
+    count_response = project_client.client.get(
+        "/api/projects/count/",
+        params={
+            "q": "alpha",
+            "project_type": "Bot",
+            "label": "Utility",
+        },
+    )
+    assert count_response.status_code == 200
+    assert count_response.json() == 1
 
 
 @pytest.mark.parametrize(

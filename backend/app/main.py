@@ -9,8 +9,11 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import get_settings
 from app.routers.auth_router import router as auth_router
 from app.routers.label_router import router as labels_router
-from app.routers.profile_router import router as profile_router
-from app.routers.project_routers import router as projects_router
+from app.routers.profile_router import (
+    public_router as public_profiles_router,
+    router as profile_router,
+)
+from app.routers.project_router import router as projects_router
 from app.routers.project_type_router import router as project_types_router
 
 settings = get_settings()

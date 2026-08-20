@@ -90,12 +90,19 @@ GET /api/health
 
 | Method | Path | Access | Success | Description |
 | --- | --- | --- | --- | --- |
-| `GET` | `/api/projects/` | Public | `200 OK` | List all projects |
+| `GET` | `/api/projects/` | Public | `200 OK` | Search, filter, and list projects |
 | `GET` | `/api/projects/mine/` | Authenticated | `200 OK` | List projects owned by the current user |
+| `GET` | `/api/projects/count/` | Public | `200 OK` | Count projects matching optional filters |
+| `GET` | `/api/projects/random/` | Public | `200 OK` | Return a random project selection |
 | `GET` | `/api/projects/{project_id}` | Public | `200 OK` | Get one project |
 | `POST` | `/api/projects/` | Authenticated | `201 Created` | Create a project |
 | `PATCH` | `/api/projects/{project_id}` | Owner | `200 OK` | Update supplied fields |
 | `DELETE` | `/api/projects/{project_id}` | Owner | `204 No Content` | Delete a project |
+
+The list and count endpoints accept `q`, `project_type`, and `label` query
+parameters. Search treats `%` and `_` as literal text. The list endpoint also
+accepts `limit` (1–100, default 50) and `offset` (default 0). The random
+endpoint accepts `limit` (1–24, default 6).
 
 ### Create a project
 

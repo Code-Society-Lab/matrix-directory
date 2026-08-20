@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Any
-from urllib.parse import urlsplit
 from uuid import UUID
 
 from pydantic import (
@@ -12,24 +11,17 @@ from pydantic import (
 )
 
 from .label import LabelRead
+from .project_owner import ProjectOwnerRead
 from .project_type import ProjectTypeRead
+from ..utils.validators import normalize_optional_http_url
 
 
-def normalize_optional_http_url(value: Any) -> Any:
-    """Normalize blank URLs and reject non-HTTP(S) or relative URLs."""
-    if not isinstance(value, str):
-        return value
+class ProjectFilters(BaseModel):
+    """Optional filters shared by project listing and counting endpoints."""
 
-    value = value.strip()
-    if not value:
-        return None
-
-    parsed = urlsplit(value)
-
-    if parsed.scheme not in {"http", "https"} or parsed.hostname is None:
-        raise ValueError("Must be an absolute HTTP or HTTPS URL")
-
-    return value
+    q: str | None = Field(default=None, max_length=200)
+    project_type: str | None = Field(default=None, max_length=100)
+    label: str | None = Field(default=None, max_length=100)
 
 
 class ProjectCreate(BaseModel):
@@ -178,32 +170,6 @@ class ProjectUpdate(BaseModel):
             raise ValueError("Field cannot be null")
 
         return value
-
-
-class ProjectOwnerRead(BaseModel):
-    """Public information about a project owner."""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    id: UUID
-    display_name: str | None = None
-    matrix_id: str | None = None
-    avatar_url: str | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def from_user(cls, value: Any) -> Any:
-        if isinstance(value, dict):
-            return value
-
-        profile = getattr(value, "profile", None)
-
-        return {
-            "id": value.id,
-            "display_name": (profile.display_name if profile is not None else None),
-            "matrix_id": (profile.matrix_id if profile is not None else None),
-            "avatar_url": (profile.avatar_url if profile is not None else None),
-        }
 
 
 class ProjectRead(BaseModel):

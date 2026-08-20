@@ -1,12 +1,10 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlmodel import Field
 from sqlmodel_toolkit import Model
 
-
-def utc_now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
+from ..utils.datetime import utc_now
 
 
 class AuthSession(Model, table=True):
