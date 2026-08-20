@@ -6,7 +6,7 @@ import type {
   ProjectType,
 } from '../types/project'
 
-export interface Profile {
+interface Profile {
   matrix_id: string | null
   matrix_id_verified: boolean
   display_name: string | null
@@ -35,7 +35,7 @@ export interface PublicProfile extends Profile {
   projects: ProjectListItem[]
 }
 
-export type ValidationIssue = {
+type ValidationIssue = {
   loc: Array<string | number>
   msg: string
   type: string
