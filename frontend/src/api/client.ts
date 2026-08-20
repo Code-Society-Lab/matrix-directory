@@ -6,7 +6,7 @@ import type {
   ProjectType,
 } from '../types/project'
 
-interface Profile {
+export interface Profile {
   matrix_id: string | null
   matrix_id_verified: boolean
   display_name: string | null
@@ -28,6 +28,11 @@ export interface ProfileUpdate {
   avatar_url: string | null
   github_url: string | null
   website_url: string | null
+}
+
+export interface PublicProfile extends Profile {
+  user_id: string | null
+  projects: ProjectListItem[]
 }
 
 export type ValidationIssue = {
@@ -112,6 +117,10 @@ export function updateMyProfile(profile: ProfileUpdate) {
     method: 'PUT',
     body: JSON.stringify(profile),
   })
+}
+
+export function getPublicProfile(userId: string) {
+  return request<PublicProfile>(`/profiles/${userId}`)
 }
 
 export function logout() {
