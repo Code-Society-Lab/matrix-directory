@@ -1,9 +1,11 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlmodel import Field, Relationship
 from sqlmodel_toolkit import Model
+
+from app.utils.datetime import utc_now
 
 from .label import Label
 from .project_label import ProjectLabel
@@ -11,11 +13,6 @@ from .project_type import ProjectType
 
 if TYPE_CHECKING:
     from .user import User
-
-
-def utc_now() -> datetime:
-    """Return the current UTC time without timezone information."""
-    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class Project(Model, table=True):

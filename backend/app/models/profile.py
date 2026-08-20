@@ -1,16 +1,14 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlmodel import Field, Relationship
 from sqlmodel_toolkit import Model
 
+from ..utils.datetime import utc_now
+
 if TYPE_CHECKING:
     from .user import User
-
-
-def utc_now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class Profile(Model, table=True):

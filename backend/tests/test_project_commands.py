@@ -1,3 +1,5 @@
+"""Tests for project write operations and ownership rules."""
+
 from uuid import uuid4
 
 import pytest
@@ -9,7 +11,7 @@ from app.models.project_type import ProjectType
 from app.models.user import User
 from app.schemas.project import ProjectUpdate
 from app.services.errors import ProjectLinkRequiredError, ProjectTypeNotFoundError
-from app.services.projects_service import delete_project, update_project
+from app.services.project_commands import delete_project, update_project
 
 
 def test_project_writes__expect_only_owner_allowed(session: Session) -> None:
