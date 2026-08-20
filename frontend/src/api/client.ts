@@ -30,7 +30,12 @@ export interface ProfileUpdate {
   website_url: string | null
 }
 
-export type ValidationIssue = {
+export interface PublicProfile extends Profile {
+  user_id: string | null
+  projects: ProjectListItem[]
+}
+
+type ValidationIssue = {
   loc: Array<string | number>
   msg: string
   type: string
@@ -112,6 +117,10 @@ export function updateMyProfile(profile: ProfileUpdate) {
     method: 'PUT',
     body: JSON.stringify(profile),
   })
+}
+
+export function getPublicProfile(userId: string) {
+  return request<PublicProfile>(`/profiles/${userId}`)
 }
 
 export function logout() {

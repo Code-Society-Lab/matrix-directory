@@ -2,6 +2,22 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .project import ProjectRead
+
+
+class ProfilePublicFields(BaseModel):
+    """Profile fields that are safe to expose publicly."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    matrix_id: str | None = None
+    matrix_id_verified: bool = False
+    display_name: str | None = None
+    bio: str | None = None
+    avatar_url: str | None = None
+    github_url: str | None = None
+    website_url: str | None = None
+
 
 class ProfileUpdate(BaseModel):
     """Schema for updating a user profile."""
@@ -14,16 +30,14 @@ class ProfileUpdate(BaseModel):
     website_url: str | None = Field(default=None, max_length=500)
 
 
-class ProfileRead(BaseModel):
-    """Schema for reading a user profile."""
-
-    model_config = ConfigDict(from_attributes=True)
+class ProfileRead(ProfilePublicFields):
+    """Profile record returned to the authenticated user."""
 
     id: UUID
-    matrix_id: str | None
-    matrix_id_verified: bool
-    display_name: str | None
-    bio: str | None
-    avatar_url: str | None
-    github_url: str | None
-    website_url: str | None
+
+
+class PublicProfileRead(ProfilePublicFields):
+    """Public profile and its published projects."""
+
+    user_id: UUID
+    projects: list[ProjectRead]

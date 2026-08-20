@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import {
+  ArrowTopRightOnSquareIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline'
@@ -121,15 +122,11 @@ onMounted(load)
 <template>
   <main class="mx-auto max-w-[1120px] px-5 py-10 pb-24 sm:px-8">
     <div class="max-w-2xl">
-      <p
-        class="font-mono text-xs font-medium uppercase tracking-[0.08em] text-[var(--accent-ink)]"
-      >
+      <p class="font-mono text-xs font-medium uppercase tracking-[0.08em] text-[var(--accent-ink)]">
         Account
       </p>
 
-      <h1
-        class="mt-3 font-display text-[34px] font-semibold tracking-[-0.02em] text-[var(--text)]"
-      >
+      <h1 class="mt-3 font-display text-[34px] font-semibold tracking-[-0.02em] text-[var(--text)]">
         My profile
       </h1>
 
@@ -159,60 +156,69 @@ onMounted(load)
         @submit.prevent="save"
       >
         <!-- Identity -->
-        <section class="flex items-center gap-4 p-6 sm:p-7">
-          <div
-            class="grid size-[68px] shrink-0 place-items-center overflow-hidden rounded-[16px] bg-[var(--accent-soft)] font-display text-xl font-semibold text-[var(--accent-ink)]"
+        <section class="p-6 sm:flex sm:items-center sm:gap-6 sm:p-7">
+          <div class="flex min-w-0 items-center gap-4">
+            <div
+              class="grid size-[64px] shrink-0 place-items-center overflow-hidden rounded-[16px] bg-[var(--accent-soft)] font-display text-xl font-semibold text-[var(--accent-ink)]"
+            >
+              <img
+                v-if="form.avatar_url"
+                :src="form.avatar_url"
+                alt=""
+                class="size-full object-cover"
+              >
+
+              <span v-else>
+                {{ initials }}
+              </span>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <h2
+                class="truncate font-display text-lg font-semibold tracking-[-0.01em] text-[var(--text)]"
+              >
+                {{ form.display_name || 'Your profile' }}
+              </h2>
+
+              <p
+                v-if="form.matrix_id"
+                class="mt-1 truncate font-mono text-xs text-[var(--muted)]"
+              >
+                {{ form.matrix_id }}
+              </p>
+
+              <span
+                v-if="form.matrix_id"
+                class="mt-2 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                :class="
+                  user?.profile?.matrix_id_verified
+                    ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)]'
+                    : 'bg-[var(--sunk)] text-[var(--muted)]'
+                "
+              >
+                {{
+                  user?.profile?.matrix_id_verified
+                    ? '✓ Verified'
+                    : 'Unverified'
+                }}
+              </span>
+            </div>
+          </div>
+
+          <RouterLink
+            v-if="user?.id"
+            :to="`/profiles/${user.id}`"
+            class="mt-5 inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-[9px] border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-[13px] font-medium text-[var(--muted)] no-underline transition hover:border-[var(--border-strong)] hover:bg-[var(--hover)] hover:text-[var(--text)] sm:ml-auto sm:mt-0 sm:w-auto"
           >
-            <img
-              v-if="form.avatar_url"
-              :src="form.avatar_url"
-              alt=""
-              class="size-full object-cover"
-            >
-
-            <span v-else>
-              {{ initials }}
-            </span>
-          </div>
-
-          <div class="min-w-0">
-            <h2
-              class="font-display text-lg font-semibold tracking-[-0.01em] text-[var(--text)]"
-            >
-              {{ form.display_name || 'Your profile' }}
-            </h2>
-
-            <p
-              v-if="form.matrix_id"
-              class="mt-1 truncate font-mono text-xs text-[var(--muted)]"
-            >
-              {{ form.matrix_id }}
-            </p>
-
-            <span
-              v-if="form.matrix_id"
-              class="mt-2 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
-              :class="
-                user?.profile?.matrix_id_verified
-                  ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)]'
-                  : 'bg-[var(--sunk)] text-[var(--muted)]'
-              "
-            >
-              {{
-                user?.profile?.matrix_id_verified
-                  ? '✓ Verified'
-                  : 'Unverified'
-              }}
-            </span>
-          </div>
+            View public profile
+            <ArrowTopRightOnSquareIcon class="size-4" />
+          </RouterLink>
         </section>
 
         <!-- Profile -->
         <section class="border-t border-[var(--border)] p-6 sm:p-7">
           <div class="border-b border-[var(--border)] pb-3">
-            <h2
-              class="font-mono text-xs font-medium uppercase tracking-[0.06em] text-[var(--faint)]"
-            >
+            <h2 class="font-mono text-xs font-medium uppercase tracking-[0.06em] text-[var(--faint)]">
               Profile
             </h2>
           </div>
@@ -272,9 +278,7 @@ onMounted(load)
         <!-- Links -->
         <section class="border-t border-[var(--border)] p-6 sm:p-7">
           <div class="border-b border-[var(--border)] pb-3">
-            <h2
-              class="font-mono text-xs font-medium uppercase tracking-[0.06em] text-[var(--faint)]"
-            >
+            <h2 class="font-mono text-xs font-medium uppercase tracking-[0.06em] text-[var(--faint)]">
               Links
             </h2>
           </div>
