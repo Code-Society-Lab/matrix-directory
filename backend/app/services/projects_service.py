@@ -1,21 +1,102 @@
 from uuid import UUID
 
-from sqlmodel import Session, select
+from sqlalchemy import func, or_
+from sqlmodel import Session, col, select
 
+from app.models.label import Label
+from app.models.profile import Profile
 from app.models.project import Project
+from app.models.project_label import ProjectLabel
+from app.models.project_type import ProjectType
 from app.schemas.project import ProjectCreate, ProjectUpdate
 
 from . import labels_service, project_types_service
 from .errors import ProjectLinkRequiredError
 
 
-def list_projects(session: Session) -> list[Project]:
+def list_projects(
+    session: Session,
+    *,
+    query: str | None = None,
+    project_type: str | None = None,
+    label: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[Project]:
     statement = select(Project)
+
+    if query:
+        pattern = f"%{query.strip()}%"
+        matching_project_types = select(ProjectType.id).where(
+            col(ProjectType.name).ilike(pattern)
+        )
+        matching_project_labels = (
+            select(ProjectLabel.project_id)
+            .join(Label, col(ProjectLabel.label_id) == col(Label.id))
+            .where(col(Label.name).ilike(pattern))
+        )
+        matching_owners = select(Profile.user_id).where(
+            or_(
+                col(Profile.display_name).ilike(pattern),
+                col(Profile.matrix_id).ilike(pattern),
+            )
+        )
+        statement = statement.where(
+            or_(
+                col(Project.name).ilike(pattern),
+                col(Project.short_description).ilike(pattern),
+                col(Project.description).ilike(pattern),
+                col(Project.project_type_id).in_(matching_project_types),
+                col(Project.id).in_(matching_project_labels),
+                col(Project.user_id).in_(matching_owners),
+            )
+        )
+
+    if project_type:
+        matching_project_type = select(ProjectType.id).where(
+            ProjectType.name == project_type
+        )
+        statement = statement.where(
+            col(Project.project_type_id).in_(matching_project_type)
+        )
+
+    if label:
+        matching_label = (
+            select(ProjectLabel.project_id)
+            .join(Label, col(ProjectLabel.label_id) == col(Label.id))
+            .where(col(Label.name) == label)
+        )
+        statement = statement.where(col(Project.id).in_(matching_label))
+
+    statement = (
+        statement.order_by(col(Project.created_at).desc()).offset(offset).limit(limit)
+    )
+    return list(session.exec(statement).all())
+
+
+def count_projects(session: Session) -> int:
+    statement = select(func.count()).select_from(Project)
+    return int(session.exec(statement).one())
+
+
+def list_random_projects(
+    session: Session,
+    *,
+    limit: int = 6,
+) -> list[Project]:
+    statement = select(Project).order_by(func.random()).limit(limit)
     return list(session.exec(statement).all())
 
 
 def list_projects_for_user(session: Session, *, user_id: UUID) -> list[Project]:
-    statement = select(Project).where(Project.user_id == user_id)
+    statement = (
+        select(Project)
+        .where(Project.user_id == user_id)
+        .order_by(
+            col(Project.updated_at).desc(),
+            col(Project.created_at).desc(),
+        )
+    )
     return list(session.exec(statement).all())
 
 

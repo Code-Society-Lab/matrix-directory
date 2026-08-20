@@ -108,6 +108,76 @@ def test_create__expect_project_associated_with_authenticated_user(
     assert [label["id"] for label in body["labels"]] == [str(project_client.label_id)]
 
 
+def test_random_projects__expect_requested_limit_and_total_count(
+    project_client: ProjectClient,
+) -> None:
+    for index in range(3):
+        response = project_client.client.post(
+            "/api/projects/",
+            json={
+                "name": f"Test Project {index}",
+                "description": "A useful project.",
+                "short_description": "Useful project",
+                "repository_url": f"https://example.com/project-{index}",
+                "project_type_id": str(project_client.project_type_id),
+                "label_ids": [],
+            },
+        )
+        assert response.status_code == 201
+
+    random_response = project_client.client.get("/api/projects/random/?limit=2")
+    count_response = project_client.client.get("/api/projects/count/")
+
+    assert random_response.status_code == 200
+    assert len(random_response.json()) == 2
+    assert count_response.status_code == 200
+    assert count_response.json() == 3
+
+
+@pytest.mark.parametrize("limit", [0, 25])
+def test_random_projects_with_invalid_limit__expect_validation_error(
+    project_client: ProjectClient,
+    limit: int,
+) -> None:
+    response = project_client.client.get(f"/api/projects/random/?limit={limit}")
+
+    assert response.status_code == 422
+
+
+def test_list_projects__expect_server_side_search_and_filters(
+    project_client: ProjectClient,
+) -> None:
+    for name, labels in [
+        ("Alpha Bridge", [str(project_client.label_id)]),
+        ("Beta Bot", []),
+    ]:
+        response = project_client.client.post(
+            "/api/projects/",
+            json={
+                "name": name,
+                "description": f"Description for {name}",
+                "short_description": name,
+                "repository_url": f"https://example.com/{name.lower().replace(' ', '-')}",
+                "project_type_id": str(project_client.project_type_id),
+                "label_ids": labels,
+            },
+        )
+        assert response.status_code == 201
+
+    response = project_client.client.get(
+        "/api/projects/",
+        params={
+            "q": "alpha",
+            "project_type": "Bot",
+            "label": "Utility",
+            "limit": 24,
+        },
+    )
+
+    assert response.status_code == 200
+    assert [project["name"] for project in response.json()] == ["Alpha Bridge"]
+
+
 @pytest.mark.parametrize(
     ("project_type_id", "label_ids", "message"),
     [

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import Session
 
 from app.database import get_session
@@ -23,9 +23,21 @@ router = APIRouter(
 
 @router.get("/", response_model=list[ProjectRead])
 def list_projects(
+    q: str | None = Query(default=None, max_length=200),
+    project_type: str | None = Query(default=None, max_length=100),
+    label: str | None = Query(default=None, max_length=100),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     session: Session = Depends(get_session),
 ) -> list[Project]:
-    return projects_service.list_projects(session)
+    return projects_service.list_projects(
+        session,
+        query=q,
+        project_type=project_type,
+        label=label,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.get("/mine/", response_model=list[ProjectRead])
@@ -34,6 +46,24 @@ def list_my_projects(
     user: User = Depends(get_current_user),
 ) -> list[Project]:
     return projects_service.list_projects_for_user(session, user_id=user.id)
+
+
+@router.get("/count/", response_model=int)
+def count_projects(
+    session: Session = Depends(get_session),
+) -> int:
+    return projects_service.count_projects(session)
+
+
+@router.get("/random/", response_model=list[ProjectRead])
+def list_random_projects(
+    limit: int = Query(default=6, ge=1, le=24),
+    session: Session = Depends(get_session),
+) -> list[Project]:
+    return projects_service.list_random_projects(
+        session,
+        limit=limit,
+    )
 
 
 @router.get("/{project_id}", response_model=ProjectRead)

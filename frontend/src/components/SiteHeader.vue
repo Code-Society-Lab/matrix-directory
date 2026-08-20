@@ -15,8 +15,7 @@ import {
 
 import { currentUser, logout } from '../auth'
 
-import logoUrl from '../assets/matrix-directory-mark.svg'
-
+import BrandLogo from './BrandLogo.vue'
 
 const docsUrl =
   import.meta.env.VITE_DOCS_URL ??
@@ -73,10 +72,6 @@ const profileLabel = computed(() =>
 )
 
 function isActive(path: string) {
-  if (path === '/') {
-    return route.path === '/'
-  }
-
   return route.path.startsWith(path)
 }
 
@@ -108,11 +103,7 @@ watch(
         to="/"
         class="flex min-w-0 items-center gap-2.5 no-underline"
       >
-        <img
-          :src="logoUrl"
-          alt="Matrix Directory Logo"
-          class="size-[30px] text-[var(--accent-ink)]"
-        >
+        <BrandLogo class="size-7.5 text-[var(--text)] transition-colors hover:text-[var(--text)]" />
 
         <div class="flex min-w-0 items-baseline gap-2">
           <span
@@ -126,10 +117,10 @@ watch(
       <!-- Desktop navigation -->
       <nav class="hidden items-center gap-1 sm:flex">
         <RouterLink
-          to="/"
+          to="/browse"
           class="rounded-lg px-3 py-2 text-sm no-underline transition"
           :class="
-            isActive('/')
+            isActive('/browse')
               ? 'bg-[var(--sunk)] font-medium text-[var(--text)]'
               : 'text-[var(--muted)] hover:bg-[var(--sunk)] hover:text-[var(--text)]'
           "
@@ -139,8 +130,6 @@ watch(
 
         <a
           :href="docsUrl"
-          target="_blank"
-          rel="noopener noreferrer"
           class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-[var(--muted)] no-underline transition hover:bg-[var(--sunk)] hover:text-[var(--text)]"
         >
           Docs
@@ -284,10 +273,10 @@ watch(
           <!-- Links -->
           <nav class="p-2">
             <RouterLink
-              to="/"
+              to="/browse"
               class="flex rounded-[8px] px-3 py-2.5 text-sm no-underline transition"
               :class="
-                isActive('/')
+                isActive('/browse')
                   ? 'bg-[var(--sunk)] font-medium text-[var(--text)]'
                   : 'text-[var(--muted)] hover:bg-[var(--sunk)] hover:text-[var(--text)]'
               "

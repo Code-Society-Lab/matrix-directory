@@ -2,7 +2,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -58,6 +58,11 @@ def mount_static_sites(application: FastAPI, static_directory: Path) -> None:
     frontend_assets = static_directory / "assets"
 
     if documentation_directory.is_dir():
+
+        @application.get("/docs", include_in_schema=False)
+        def documentation_root_redirect() -> RedirectResponse:
+            return RedirectResponse(url="/docs/", status_code=307)
+
         application.mount(
             "/docs",
             StaticFiles(directory=documentation_directory, html=True),

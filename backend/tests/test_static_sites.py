@@ -34,14 +34,21 @@ def test_documentation_static_files__expect_served_under_docs(
         encoding="utf-8",
     )
 
-    application = FastAPI()
+    application = FastAPI(
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
+    )
     mount_static_sites(application, static_directory)
     client = TestClient(application)
 
     home_response = client.get("/docs/")
+    home_redirect_response = client.get("/docs", follow_redirects=False)
     guide_response = client.get("/docs/guide/")
 
     assert home_response.status_code == 200
+    assert home_redirect_response.status_code == 307
+    assert home_redirect_response.headers["location"] == "/docs/"
     assert "Documentation home" in home_response.text
     assert guide_response.status_code == 200
     assert "Documentation guide" in guide_response.text
@@ -57,7 +64,11 @@ def test_reserved_routes__expect_not_fall_through_to_frontend(
         encoding="utf-8",
     )
 
-    application = FastAPI()
+    application = FastAPI(
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
+    )
     mount_static_sites(application, static_directory)
     client = TestClient(application)
 

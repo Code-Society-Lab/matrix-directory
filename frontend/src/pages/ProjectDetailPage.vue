@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -10,8 +10,10 @@ import {
 import { getProject } from '../api/client'
 import MarkdownContent from '../components/markdown/MarkdownContent.vue'
 import type { Project } from '../types/project'
+import { projectPath } from '../utils/projectRoutes'
 
 const route = useRoute()
+const router = useRouter()
 
 const project = ref<Project | null>(null)
 const loading = ref(true)
@@ -22,7 +24,13 @@ async function loadProject() {
   error.value = ''
 
   try {
-    project.value = await getProject(String(route.params.id))
+    const loadedProject = await getProject(String(route.params.id))
+    project.value = loadedProject
+
+    const canonicalPath = projectPath(loadedProject)
+    if (route.path !== canonicalPath) {
+      await router.replace(canonicalPath)
+    }
   } catch (err) {
     error.value =
       err instanceof Error
@@ -38,9 +46,7 @@ onMounted(loadProject)
 </script>
 
 <template>
-  <main
-    class="mx-auto w-full max-w-[1120px] px-5 pb-24 pt-8 sm:px-8"
-  >
+  <main class="mx-auto max-w-[1120px] px-5 py-10 pb-24 sm:px-8">
     <!-- Loading -->
     <div
       v-if="loading"
@@ -62,7 +68,7 @@ onMounted(loadProject)
     <template v-else-if="project">
       <!-- Back -->
       <RouterLink
-        to="/"
+        to="/browse"
         class="inline-flex items-center gap-2 font-mono text-[12px] text-[var(--muted)] no-underline transition hover:text-[var(--text)]"
       >
         <ArrowLeftIcon class="size-3.5" />
@@ -73,10 +79,10 @@ onMounted(loadProject)
       <section
         class="mt-7 flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between"
       >
-        <div class="flex min-w-0 gap-5">
-          <!-- Bot avatar -->
+        <div class="flex min-w-0 gap-4 sm:gap-5">
+          <!-- Project avatar -->
           <div
-            class="grid size-[76px] shrink-0 place-items-center rounded-[18px] bg-[var(--accent-soft)] font-display text-[30px] font-semibold text-[var(--accent-ink)]"
+            class="grid size-16 shrink-0 place-items-center rounded-[18px] bg-[var(--accent-soft)] font-display text-[27px] font-semibold text-[var(--accent-ink)] sm:size-[76px] sm:text-[30px]"
           >
             {{ project.name.charAt(0).toUpperCase() }}
           </div>
@@ -85,7 +91,7 @@ onMounted(loadProject)
             <!-- Name -->
             <div class="flex flex-wrap items-center gap-3">
               <h1
-                class="font-display text-[34px] font-semibold tracking-[-0.025em] text-[var(--text)] sm:text-[40px]"
+                class="min-w-0 break-words font-display text-[30px] font-semibold tracking-[-0.025em] text-[var(--text)] sm:text-[40px]"
               >
                 {{ project.name }}
               </h1>
@@ -102,7 +108,7 @@ onMounted(loadProject)
 
             <!-- Description -->
             <p
-              class="mt-2 max-w-[650px] text-[15.5px] leading-6 text-[var(--muted)]"
+              class="mt-2 max-w-[650px] break-words text-[15.5px] leading-6 text-[var(--muted)]"
             >
               {{ project.short_description }}
             </p>
@@ -127,9 +133,11 @@ onMounted(loadProject)
 
         <!-- Actions -->
         <div
-          class="flex shrink-0 flex-row gap-2 lg:w-[200px] lg:flex-col"
+          class="flex shrink-0 flex-row flex-wrap gap-2 lg:w-[200px] lg:flex-col"
         >
+          <!-- TODO: Add new column in DB for Bot's invite link -->
           <button
+            v-if="project.project_type.name === 'Bot'"
             type="button"
             disabled
             title="Coming soon"
@@ -139,11 +147,21 @@ onMounted(loadProject)
           </button>
 
           <a
+            v-if="project.project_type.name === 'Server' && project.matrix_server_url"
+            :href="project.matrix_server_url"
+            target="_blank"
+            rel="noreferrer"
+            class="rounded-[10px] border border-[var(--border)] bg-[var(--accent)] px-4 py-3 text-center text-sm text-[var(--text)] no-underline transition hover:border-[var(--border-strong)] hover:bg-[var(--accent-deep)]"
+          >
+            Join the server
+          </a>
+
+          <a
             v-if="project.repository_url"
             :href="project.repository_url"
             target="_blank"
             rel="noreferrer"
-            class="rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-center text-sm text-[var(--text)] no-underline transition hover:border-[var(--border-strong)]"
+            class="rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-center text-sm text-[var(--text)] no-underline transition hover:border-[var(--border-strong)] hover:bg-[var(--hover)]"
           >
             Repository
           </a>
@@ -155,9 +173,9 @@ onMounted(loadProject)
         class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]"
       >
         <!-- Left -->
-        <div>
+        <div class="min-w-0">
           <!-- About -->
-          <section>
+          <section class="min-w-0 max-w-full">
             <h2
               class="font-mono text-xs font-medium uppercase tracking-[0.06em] text-[var(--faint)]"
             >
@@ -167,7 +185,7 @@ onMounted(loadProject)
             <MarkdownContent
               :source="project.description"
               aria-label="Project description"
-              class="mt-4"
+              class="mt-4 min-w-0 max-w-full"
             />
           </section>
         </div>
@@ -178,6 +196,7 @@ onMounted(loadProject)
         >
           <!-- Room / Server -->
           <div
+            v-if="project.project_type.name !== 'Server'"
             class="flex items-start justify-between gap-5 border-b border-[var(--border)] py-4"
           >
             <span

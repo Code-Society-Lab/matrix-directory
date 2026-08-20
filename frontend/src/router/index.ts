@@ -10,8 +10,26 @@ export const router = createRouter({
   routes: [
     { path: '/', component: HomePage },
     {
-      path: '/bots/:id',
-      component: () => import('../pages/BotDetailPage.vue'),
+      path: '/browse',
+      component: () => import('../pages/BrowsePage.vue'),
+    },
+    {
+      path: '/projects/:id',
+      alias: [
+        '/bots/:id',
+        '/bridges/:id',
+        '/clients/:id',
+        '/frameworks/:id',
+        '/integrations/:id',
+        '/sdks/:id',
+        '/servers/:id',
+      ],
+      component: () => import('../pages/ProjectDetailPage.vue'),
+    },
+    {
+      path: '/projects/:id/edit',
+      component: () => import('../pages/SubmitPage.vue'),
+      meta: { requiresAuth: true },
     },
     { path: '/login', component: LoginPage },
     {
