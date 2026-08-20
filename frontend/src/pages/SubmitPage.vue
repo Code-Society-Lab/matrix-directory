@@ -72,7 +72,7 @@ onMounted(load)
           Update the information shown in the public directory.
         </template>
         <template v-else>
-          Add a Matrix bot or integration to the public directory.
+          Add a Matrix project to the public directory.
           You can update these details later.
         </template>
       </p>
