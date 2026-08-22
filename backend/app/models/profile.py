@@ -28,7 +28,6 @@ class Profile(Model, table=True):
     matrix_id: str = Field(
         unique=True,
         index=True,
-        max_length=255,
     )
     matrix_id_verified: bool = Field(default=False)
 
