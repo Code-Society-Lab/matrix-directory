@@ -10,7 +10,7 @@ class ProfilePublicFields(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    matrix_id: str | None = None
+    matrix_id: str
     matrix_id_verified: bool = False
     display_name: str | None = None
     bio: str | None = None
@@ -22,7 +22,8 @@ class ProfilePublicFields(BaseModel):
 class ProfileUpdate(BaseModel):
     """Schema for updating a user profile."""
 
-    matrix_id: str | None = Field(default=None, max_length=255)
+    model_config = ConfigDict(extra="forbid")
+
     display_name: str | None = Field(default=None, max_length=255)
     bio: str | None = Field(default=None, max_length=1024)
     avatar_url: str | None = Field(default=None, max_length=500)

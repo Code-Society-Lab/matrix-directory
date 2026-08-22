@@ -3,7 +3,7 @@ from sqlmodel import Session
 
 from app.database import get_session
 from app.models.user import User
-from app.services.auth_service import SESSION_COOKIE, get_user_for_token
+from app.services.auth.auth_service import SESSION_COOKIE, get_user_for_token
 
 
 def get_current_user(

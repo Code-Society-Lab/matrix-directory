@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     matrix_oidc_client_id: str | None = None
     matrix_oidc_client_secret: str | None = None
     matrix_oidc_redirect_uri: str | None = None
+    matrix_homeserver_url: str | None = None
+    matrix_oidc_scope: str = "openid urn:matrix:client:api:*"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

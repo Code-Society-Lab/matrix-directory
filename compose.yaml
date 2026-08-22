@@ -27,6 +27,8 @@ services:
       MATRIX_OIDC_CLIENT_SECRET: ${MATRIX_OIDC_CLIENT_SECRET:-}
       MATRIX_OIDC_REDIRECT_URI: ${MATRIX_OIDC_REDIRECT_URI:-}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      MATRIX_HOMESERVER_URL: ${MATRIX_HOMESERVER_URL:-https://matrix.org}
+      MATRIX_OIDC_SCOPE: ${MATRIX_OIDC_SCOPE:-openid urn:matrix:client:api:*}
     command: >
       sh -c "pelican up &&
              python -m app.seed &&

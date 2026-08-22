@@ -37,6 +37,9 @@ sequenceDiagram
     Browser->>App: Complete login callback
     App->>MAS: Exchange code and PKCE verifier
     MAS-->>App: Return tokens and OIDC subject
+    App->>App: Call homeserver /_matrix/client/v3/account/whoami
+    App-->>App: Homeserver validates the access token through MAS
+    App->>App: Fetch /_matrix/client/v3/profile/{userId}
     App-->>Browser: Set application session and redirect to dashboard
 ```
 
@@ -62,11 +65,11 @@ as the same account.
 | User ID | Public where ownership must be represented | Stable application identifier |
 | OIDC issuer and subject | Private | Authentication and account lookup |
 | Profile | Public | Community-facing identity |
-| Matrix ID | Public but user-provided | Optional profile address |
-| Matrix ID verification | Public but server-controlled | Future proof of control |
+| Matrix ID | Resolved from the homeserver | Authoritative Matrix account address |
+| Matrix ID verification | Server-controlled | Confirms the `whoami` result for the login token |
 
-A profile's `matrix_id` is not automatically trusted. Changing it clears
-`matrix_id_verified`, and API clients cannot set the verification flag.
+A profile's Matrix ID is populated from the homeserver `whoami` response during
+login. API clients cannot set the verification flag.
 
 ## Persistence model
 
@@ -93,7 +96,7 @@ erDiagram
     PROFILE {
         UUID id PK
         UUID user_id FK, UK
-        string matrix_id UK "nullable"
+        string matrix_id UK
         bool matrix_id_verified
         string display_name "nullable"
         string bio "nullable"
@@ -157,14 +160,23 @@ erDiagram
 2. The backend redirects to MAS using the authorization-code flow with PKCE.
 3. MAS authenticates the account and redirects to
    `GET /api/auth/matrix/callback`.
-4. The backend exchanges the authorization response and reads the OIDC subject.
-5. It resolves or creates the local user by `(issuer, subject)`.
-6. It creates an opaque Matrix Directory session and stores only its hash.
-7. The browser receives the application-session cookie and is redirected to
+4. The backend exchanges the authorization response and reads the OIDC subject
+   and access token.
+5. It calls the homeserver's `/_matrix/client/v3/account/whoami` endpoint with
+   the access token and uses the returned Matrix ID as authoritative.
+6. It fetches `/_matrix/client/v3/profile/{userId}` using that verified Matrix
+   ID. Its display name seeds a missing local display name; a homeserver that
+   disables profile lookup does not prevent login.
+7. It resolves or creates the local user by `(issuer, subject)` and records the
+   verified Matrix ID on the profile.
+8. It creates an opaque Matrix Directory session and stores only its hash.
+9. The browser receives the application-session cookie and is redirected to
    the dashboard.
 
-The application currently requests only the `openid` scope. It does not
-request Matrix Client API scopes.
+The default OIDC scope is `openid urn:matrix:client:api:*`. Configure
+`MATRIX_OIDC_SCOPE` when the deployment needs an additional device scope. The
+backend uses the short-lived access token only for the immediate `whoami` call;
+it does not store that token or use the OIDC `id_token` for Matrix API access.
 
 If login fails, the callback redirects to the frontend login page with a
 user-facing error. If OIDC is not configured, the login endpoint returns
@@ -224,7 +236,7 @@ The following properties must remain true as authentication evolves:
 - Raw application-session tokens are never stored in the database.
 - Project ownership always comes from the authenticated session.
 - Authorization checks always run on the backend.
-- Clients cannot set `matrix_id_verified`.
+- Clients cannot set `matrix_id` or `matrix_id_verified`.
 - Matrix Client API access is requested only for a feature that explicitly needs it.
 
 ## Local development

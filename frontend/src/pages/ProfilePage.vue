@@ -16,6 +16,7 @@ import { currentUser } from '../auth'
 import MarkdownEditor from '../components/markdown/MarkdownEditor.vue'
 
 const user = ref<CurrentUser | null>(null)
+const matrixId = ref<string | null>(null)
 
 const loading = ref(true)
 const saving = ref(false)
@@ -23,7 +24,6 @@ const error = ref('')
 const saved = ref(false)
 
 const form = reactive<ProfileUpdate>({
-  matrix_id: null,
   display_name: null,
   bio: null,
   avatar_url: null,
@@ -67,7 +67,7 @@ async function load() {
 
     const profile = user.value.profile
 
-    form.matrix_id = profile?.matrix_id ?? null
+    matrixId.value = profile?.matrix_id ?? null
     form.display_name = profile?.display_name ?? null
     form.bio = profile?.bio ?? null
     form.avatar_url = profile?.avatar_url ?? null
@@ -90,7 +90,6 @@ async function save() {
 
   try {
     const profile = await updateMyProfile({
-      matrix_id: normalize(form.matrix_id),
       display_name: normalize(form.display_name),
       bio: normalize(form.bio),
       avatar_url: normalize(form.avatar_url),
@@ -181,14 +180,14 @@ onMounted(load)
               </h2>
 
               <p
-                v-if="form.matrix_id"
+                v-if="matrixId"
                 class="mt-1 truncate font-mono text-xs text-[var(--muted)]"
               >
-                {{ form.matrix_id }}
+                {{ matrixId }}
               </p>
 
               <span
-                v-if="form.matrix_id"
+                v-if="matrixId"
                 class="mt-2 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
                 :class="
                   user?.profile?.matrix_id_verified
@@ -244,13 +243,17 @@ onMounted(load)
               </span>
 
               <input
-                v-model="form.matrix_id"
+                :value="matrixId ?? ''"
                 type="text"
                 maxlength="255"
                 placeholder="@username:matrix.org"
                 spellcheck="false"
-                class="mt-2 w-full rounded-[10px] border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 py-2.5 font-mono text-[13px] text-[var(--text)] outline-none transition focus:border-[var(--accent)] focus:ring-3 focus:ring-[var(--accent-soft)]"
+                readonly
+                class="mt-2 w-full cursor-default rounded-[10px] border border-[var(--border)] bg-[var(--sunk)] px-3.5 py-2.5 font-mono text-[13px] text-[var(--muted)] outline-none"
               >
+              <p class="mt-1.5 text-[11px] text-[var(--faint)]">
+                Verified from your Matrix account and cannot be changed here.
+              </p>
             </label>
           </div>
 

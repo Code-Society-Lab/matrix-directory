@@ -12,7 +12,17 @@ from app.database import get_session
 from app.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.auth import CurrentUserRead
-from app.services import auth_service
+from app.services.auth import auth_service
+from app.services.errors import (
+    MatrixIdentityConflictError,
+    MatrixIdentityError,
+    MatrixProfileError,
+)
+from app.services.auth.matrix_identity import get_matrix_identity
+from app.services.auth.matrix_profile import (
+    MatrixProfile,
+    get_matrix_profile,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 settings = get_settings()
@@ -25,7 +35,7 @@ oauth.register(
         f"{settings.matrix_oidc_issuer.rstrip('/')}/.well-known/openid-configuration"
     ),
     client_kwargs={
-        "scope": "openid",
+        "scope": settings.matrix_oidc_scope,
         "code_challenge_method": "S256",
         "token_endpoint_auth_method": (
             "client_secret_basic" if settings.matrix_oidc_client_secret else "none"
@@ -36,7 +46,7 @@ oauth.register(
 
 @router.get("/matrix/login")
 async def start_matrix_login(request: Request) -> Response:
-    if not settings.matrix_oidc_client_id:
+    if not settings.matrix_oidc_client_id or not settings.matrix_homeserver_url:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Matrix login is not configured",
@@ -55,23 +65,55 @@ async def complete_matrix_login(
     request: Request,
     session: Session = Depends(get_session),
 ) -> Response:
+    homeserver_url = settings.matrix_homeserver_url
+    if not homeserver_url:
+        query = urlencode({"error": "Matrix login is not configured."})
+        return RedirectResponse(
+            f"{settings.frontend_origin}/login?{query}",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
     client = oauth.create_client("matrix")
     assert client is not None
     try:
         token = await client.authorize_access_token(request)
         subject = token["userinfo"]["sub"]
-    except (KeyError, OAuthError):
+        access_token = token["access_token"]
+        matrix_identity = await get_matrix_identity(
+            homeserver_url,
+            access_token,
+        )
+    except (KeyError, MatrixIdentityError, OAuthError):
         query = urlencode({"error": "Matrix login failed. Please try again."})
         return RedirectResponse(
             f"{settings.frontend_origin}/login?{query}",
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    session_token = auth_service.create_session(
-        session,
-        issuer=settings.matrix_oidc_issuer,
-        subject=subject,
-    )
+    try:
+        matrix_profile = await get_matrix_profile(
+            homeserver_url,
+            matrix_identity.user_id,
+        )
+    except MatrixProfileError:
+        # Profile lookup can be disabled by a homeserver. It is enrichment,
+        # not part of proving which Matrix account owns the access token.
+        matrix_profile = MatrixProfile()
+
+    try:
+        session_token = auth_service.create_session(
+            session,
+            issuer=settings.matrix_oidc_issuer,
+            subject=subject,
+            matrix_id=matrix_identity.user_id,
+            matrix_display_name=matrix_profile.displayname,
+        )
+    except MatrixIdentityConflictError:
+        query = urlencode({"error": "Matrix login failed. Please try again."})
+        return RedirectResponse(
+            f"{settings.frontend_origin}/login?{query}",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
     response = RedirectResponse(
         f"{settings.frontend_origin}/dashboard",
         status_code=status.HTTP_303_SEE_OTHER,
