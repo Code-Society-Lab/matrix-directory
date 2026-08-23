@@ -72,7 +72,7 @@ onMounted(loadProject)
         class="inline-flex items-center gap-2 font-mono text-[12px] text-[var(--muted)] no-underline transition hover:text-[var(--text)]"
       >
         <ArrowLeftIcon class="size-3.5" />
-        back to directory
+        Directory
       </RouterLink>
 
       <!-- Hero -->
