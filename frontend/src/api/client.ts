@@ -7,7 +7,7 @@ import type {
 } from '../types/project'
 
 interface Profile {
-  matrix_id: string | null
+  matrix_id: string
   matrix_id_verified: boolean
   display_name: string | null
   bio: string | null
@@ -22,7 +22,6 @@ export interface CurrentUser {
 }
 
 export interface ProfileUpdate {
-  matrix_id: string | null
   display_name: string | null
   bio: string | null
   avatar_url: string | null

@@ -73,8 +73,10 @@ docker compose down -v
 Matrix Directory authenticates users through the Matrix Authentication Service
 (MAS) using OpenID Connect.
 
-Application accounts are identified by the OIDC `(issuer, subject)` pair rather
-than by a Matrix ID.
+Application accounts are identified by the OIDC `(issuer, subject)` pair. During
+login, the backend resolves the authoritative Matrix ID by calling the
+homeserver `/_matrix/client/v3/account/whoami` endpoint with the MAS access
+token.
 
 For local development with a real Matrix account, use the helper script to
 register an OAuth client and start an HTTPS tunnel:

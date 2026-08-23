@@ -1,4 +1,8 @@
+import pytest
+from fastapi import HTTPException, status
+from pydantic import ValidationError
 from sqlmodel import Session
+from uuid import uuid4
 
 from app.models.profile import Profile
 from app.models.project import Project
@@ -10,9 +14,8 @@ from app.schemas.profile import ProfileUpdate
 from app.schemas.user import UserRead
 
 
-def profile_update(matrix_id: str) -> ProfileUpdate:
+def profile_update() -> ProfileUpdate:
     return ProfileUpdate(
-        matrix_id=matrix_id,
         display_name="Owner",
         bio=None,
         avatar_url=None,
@@ -21,7 +24,9 @@ def profile_update(matrix_id: str) -> ProfileUpdate:
     )
 
 
-def test_changing_matrix_id__expect_verification_cleared(session: Session) -> None:
+def test_profile_update__preserves_server_managed_matrix_identity(
+    session: Session,
+) -> None:
     user = User(oidc_issuer="issuer", oidc_subject="subject")
     session.add(user)
     session.flush()
@@ -35,35 +40,47 @@ def test_changing_matrix_id__expect_verification_cleared(session: Session) -> No
     session.commit()
 
     profile = update_my_profile(
-        profile_update("@new:example.org"),
+        profile_update(),
         user,
         session,
     )
 
-    assert profile.matrix_id == "@new:example.org"
-    assert profile.matrix_id_verified is False
+    assert profile.matrix_id == "@old:example.org"
+    assert profile.matrix_id_verified is True
 
 
-def test_unchanged_matrix_id__expect_verification_preserved(session: Session) -> None:
+def test_profile_update__rejects_matrix_id() -> None:
+    with pytest.raises(ValidationError):
+        ProfileUpdate.model_validate(
+            {
+                "matrix_id": "@other:example.org",
+                "display_name": "Owner",
+            }
+        )
+
+
+def test_profile_update__returns_404_when_profile_is_missing(
+    session: Session,
+) -> None:
     user = User(oidc_issuer="issuer", oidc_subject="subject")
     session.add(user)
-    session.flush()
-    session.add(
-        Profile(
-            user_id=user.id,
-            matrix_id="@owner:example.org",
-            matrix_id_verified=True,
-        )
-    )
     session.commit()
 
-    profile = update_my_profile(
-        profile_update("@owner:example.org"),
-        user,
-        session,
-    )
+    with pytest.raises(HTTPException) as exc_info:
+        update_my_profile(profile_update(), user, session)
 
-    assert profile.matrix_id_verified is True
+    assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+    assert exc_info.value.detail == "Profile not found"
+
+
+def test_public_profile__returns_404_when_profile_is_missing(
+    session: Session,
+) -> None:
+    with pytest.raises(HTTPException) as exc_info:
+        get_public_profile(uuid4(), session)
+
+    assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+    assert exc_info.value.detail == "Profile not found"
 
 
 def test_user_schemas__expect_profile_relationships_serialized(

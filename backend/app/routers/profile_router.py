@@ -22,37 +22,40 @@ router = APIRouter(prefix="/profile", tags=["profile"])
 public_router = APIRouter(prefix="/profiles", tags=["profiles"])
 
 
-@public_router.get("/{user_id}", response_model=PublicProfileRead)
-def get_public_profile(
+def _get_profile_or_404(
+    session: Session,
     user_id: UUID,
-    session: Session = Depends(get_session),
-) -> PublicProfileRead:
-    user = session.get(User, user_id)
+) -> Profile:
+    profile = session.exec(select(Profile).where(Profile.user_id == user_id)).first()
 
-    if user is None:
+    if profile is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profile not found",
         )
 
-    profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
+    return profile
 
-    profile_fields = (
-        ProfilePublicFields.model_validate(profile)
-        if profile is not None
-        else ProfilePublicFields()
-    )
+
+@public_router.get("/{user_id}", response_model=PublicProfileRead)
+def get_public_profile(
+    user_id: UUID,
+    session: Session = Depends(get_session),
+) -> PublicProfileRead:
+    profile = _get_profile_or_404(session, user_id)
+
+    profile_fields = ProfilePublicFields.model_validate(profile)
 
     projects = [
         ProjectRead.model_validate(project)
         for project in project_queries.list_projects_for_user(
             session,
-            user_id=user.id,
+            user_id=user_id,
         )
     ]
 
     return PublicProfileRead(
-        user_id=user.id,
+        user_id=user_id,
         projects=projects,
         **profile_fields.model_dump(),
     )
@@ -64,17 +67,9 @@ def update_my_profile(
     user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ) -> Profile:
-    profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
+    profile = _get_profile_or_404(session, user.id)
 
-    if profile is None:
-        profile = Profile(user_id=user.id)
-
-    values = data.model_dump()
-
-    if values["matrix_id"] != profile.matrix_id:
-        profile.matrix_id_verified = False
-
-    for field, value in values.items():
+    for field, value in data.model_dump().items():
         setattr(profile, field, value)
 
     profile.updated_at = utc_now()

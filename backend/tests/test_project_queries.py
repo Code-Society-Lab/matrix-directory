@@ -82,7 +82,10 @@ def test_list_projects__expect_response_relationships_eagerly_loaded(
     session: Session,
 ) -> None:
     owner = User(oidc_issuer="issuer", oidc_subject="owner")
-    owner.profile = Profile(display_name="Maintainer")
+    owner.profile = Profile(
+        matrix_id="@maintainer:example.org",
+        display_name="Maintainer",
+    )
     project_type = ProjectType(name="Bot")
     label = Label(name="Utility")
     session.add_all([owner, project_type, label])

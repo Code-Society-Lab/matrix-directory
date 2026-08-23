@@ -25,11 +25,9 @@ class Profile(Model, table=True):
         nullable=False,
     )
 
-    matrix_id: str | None = Field(
-        default=None,
+    matrix_id: str = Field(
         unique=True,
         index=True,
-        max_length=255,
     )
     matrix_id_verified: bool = Field(default=False)
 
