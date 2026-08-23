@@ -37,7 +37,7 @@ export const router = createRouter({
     },
     { path: '/login', component: LoginPage },
     {
-      path: '/profile',
+      path: '/account/profile',
       component: () => import('../pages/ProfilePage.vue'),
       meta: { requiresAuth: true },
     },

@@ -8,8 +8,10 @@ import {
   ExclamationTriangleIcon,
   GlobeAltIcon,
   FlagIcon,
+  PencilSquareIcon,
 } from '@heroicons/vue/24/outline'
 
+import { currentUser } from '../auth'
 import {
   getPublicProfile,
   type PublicProfile,
@@ -41,6 +43,10 @@ const initials = computed(() =>
 )
 
 const bio = computed(() => profile.value?.bio ?? '')
+
+const isOwnProfile = computed(
+  () => currentUser.value?.id === profile.value?.user_id,
+)
 
 async function loadProfile() {
   loading.value = true
@@ -96,13 +102,24 @@ onMounted(loadProfile)
     </div>
 
     <template v-else-if="profile">
-      <RouterLink
-        to="/browse"
-        class="inline-flex items-center gap-2 font-mono text-[12px] text-[var(--muted)] no-underline transition hover:text-[var(--text)]"
-      >
-        <ArrowLeftIcon class="size-3.5" />
-        back to directory
-      </RouterLink>
+      <div class="flex items-center justify-between gap-4">
+        <RouterLink
+          to="/browse"
+          class="inline-flex items-center gap-2 font-mono text-[12px] text-[var(--muted)] no-underline transition hover:text-[var(--text)]"
+        >
+          <ArrowLeftIcon class="size-3.5" />
+          Directory
+        </RouterLink>
+
+        <RouterLink
+          v-if="isOwnProfile"
+          to="/account/profile"
+          class="inline-flex items-center gap-1.5 rounded-[9px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[12px] font-medium text-[var(--muted)] no-underline transition hover:border-[var(--border-strong)] hover:bg-[var(--hover)] hover:text-[var(--text)]"
+        >
+          <PencilSquareIcon class="size-4" />
+          Edit profile
+        </RouterLink>
+      </div>
 
       <div class="mt-7 grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
         <!-- Profile -->

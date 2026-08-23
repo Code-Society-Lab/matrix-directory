@@ -356,12 +356,9 @@ onBeforeUnmount(() => {
 
           <RouterLink
             :to="`/profiles/${user.id}`"
-            target="_blank"
-            rel="noopener noreferrer"
             class="mt-5 inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-[9px] border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-[13px] font-medium text-[var(--muted)] no-underline transition hover:border-[var(--border-strong)] hover:bg-[var(--hover)] hover:text-[var(--text)] sm:ml-auto sm:mt-0 sm:w-auto"
           >
             View public profile
-            <ArrowTopRightOnSquareIcon class="size-4" />
           </RouterLink>
         </section>
 
