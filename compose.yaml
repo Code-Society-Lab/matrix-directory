@@ -29,6 +29,7 @@ services:
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
       MATRIX_HOMESERVER_URL: ${MATRIX_HOMESERVER_URL:-https://matrix.org}
       MATRIX_OIDC_SCOPE: ${MATRIX_OIDC_SCOPE:-openid urn:matrix:client:api:*}
+      MATRIX_TOKEN_ENCRYPTION_KEY: ${MATRIX_TOKEN_ENCRYPTION_KEY:-}
     command: >
       sh -c "pelican up &&
              python -m app.seed &&

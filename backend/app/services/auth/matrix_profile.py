@@ -9,6 +9,7 @@ class MatrixProfile(BaseModel):
     """Public profile returned by the Matrix Client-Server API."""
 
     displayname: str | None = None
+    avatar_url: str | None = None
 
 
 async def get_matrix_profile(
