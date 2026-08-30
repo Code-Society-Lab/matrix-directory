@@ -14,12 +14,14 @@ import {
 } from '@heroicons/vue/24/outline'
 
 import {
+  disconnectMatrixAvatar,
   getCurrentUser,
   updateMyProfile,
   type CurrentUser,
   type ProfileUpdate,
 } from '../api/client'
 import { currentUser } from '../auth'
+import AvatarImage from '../components/AvatarImage.vue'
 import MarkdownEditor from '../components/markdown/MarkdownEditor.vue'
 
 const ABOUT_YOU_MAX_LENGTH = 1024
@@ -30,6 +32,8 @@ const matrixAccountUrl =
 
 const user = ref<CurrentUser | null>(null)
 const matrixId = ref<string | null>(null)
+const matrixAvatarUrl = ref<string | null>(null)
+const disconnecting = ref(false)
 
 const loading = ref(true)
 const saving = ref(false)
@@ -58,20 +62,15 @@ const aboutYou = computed({
   },
 })
 
-const initials = computed(() => {
-  const name = form.display_name?.trim()
+// The backend decides whether a Matrix avatar exists; the client never
+// infers it from the shape of an avatar URL.
+const usingMatrixAvatar = computed(
+  () => !form.avatar_url && matrixAvatarUrl.value !== null,
+)
 
-  if (!name) {
-    return '?'
-  }
-
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-})
+const previewAvatarUrl = computed(
+  () => form.avatar_url || matrixAvatarUrl.value,
+)
 
 function normalize(value: string | null): string | null {
   const result = value?.trim()
@@ -108,12 +107,48 @@ const showFloatingSaveBar = computed(
 
 function applyProfile(profile: CurrentUser['profile']) {
   matrixId.value = profile?.matrix_id ?? null
+  matrixAvatarUrl.value = profile?.matrix_avatar_url ?? null
 
   form.display_name = profile?.display_name ?? null
   form.bio = profile?.bio ?? null
-  form.avatar_url = profile?.avatar_url ?? null
+  form.avatar_url = profile?.custom_avatar_url ?? null
   form.github_url = profile?.github_url ?? null
   form.website_url = profile?.website_url ?? null
+}
+
+function useMatrixAvatar() {
+  form.avatar_url = null
+}
+
+async function disconnectMatrix() {
+  if (disconnecting.value) {
+    return
+  }
+
+  disconnecting.value = true
+  error.value = ''
+
+  try {
+    const profile = await disconnectMatrixAvatar()
+
+    applyProfile(profile)
+    initialForm.value = snapshotForm()
+
+    if (user.value) {
+      user.value.profile = profile
+    }
+
+    if (currentUser.value) {
+      currentUser.value.profile = profile
+    }
+  } catch (err) {
+    error.value =
+      err instanceof Error
+        ? err.message
+        : 'Could not disconnect your Matrix avatar.'
+  } finally {
+    disconnecting.value = false
+  }
 }
 
 async function load() {
@@ -256,7 +291,7 @@ onBeforeUnmount(() => {
       </h1>
 
       <p class="mt-2 text-[15px] leading-6 text-[var(--muted)]">
-        Manage how you appear alongside the bots you publish.
+        Manage how you appear alongside the projects you publish.
       </p>
     </div>
 
@@ -289,16 +324,10 @@ onBeforeUnmount(() => {
             <div
               class="grid size-[64px] shrink-0 place-items-center overflow-hidden rounded-[16px] bg-[var(--accent-soft)] font-display text-xl font-semibold text-[var(--accent-ink)]"
             >
-              <img
-                v-if="form.avatar_url"
-                :src="form.avatar_url"
-                alt=""
-                class="size-full object-cover"
-              >
-
-              <span v-else>
-                {{ initials }}
-              </span>
+              <AvatarImage
+                :src="previewAvatarUrl"
+                :name="form.display_name"
+              />
             </div>
 
             <div class="min-w-0 flex-1">
@@ -420,6 +449,97 @@ onBeforeUnmount(() => {
           </label>
         </section>
 
+        <!-- Avatar -->
+        <section
+          class="border-t border-[var(--border)] p-6"
+        >
+          <div
+            class="border-b border-[var(--border)] pb-3"
+          >
+            <h2
+              class="font-mono text-xs font-medium uppercase tracking-[0.06em] text-[var(--faint)]"
+            >
+              Avatar
+            </h2>
+          </div>
+
+          <div class="mt-6 flex items-center gap-4">
+            <div
+              class="grid size-12 shrink-0 place-items-center overflow-hidden rounded-[12px] bg-[var(--accent-soft)] font-display text-sm font-semibold text-[var(--accent-ink)]"
+            >
+              <AvatarImage
+                :src="previewAvatarUrl"
+                :name="form.display_name"
+              />
+            </div>
+
+            <p class="min-w-0 flex-1 text-[12px] text-[var(--muted)]">
+              <template v-if="usingMatrixAvatar">
+                Using your Matrix profile avatar.
+              </template>
+
+              <template v-else-if="form.avatar_url">
+                Using a custom image.
+              </template>
+
+              <template v-else>
+                No avatar set.
+              </template>
+            </p>
+
+            <button
+              v-if="!usingMatrixAvatar && matrixAvatarUrl"
+              type="button"
+              class="shrink-0 cursor-pointer rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[12px] font-medium text-[var(--muted)] transition hover:border-[var(--border-strong)] hover:bg-[var(--hover)] hover:text-[var(--text)]"
+              @click="useMatrixAvatar"
+            >
+              Use Matrix avatar
+            </button>
+          </div>
+
+          <label class="mt-5 block max-w-lg">
+            <span
+              class="text-[13px] font-medium text-[var(--text)]"
+            >
+              Custom image URL
+            </span>
+
+            <input
+              v-model="form.avatar_url"
+              type="url"
+              maxlength="500"
+              placeholder="https://example.com/avatar.png"
+              class="mt-2 w-full rounded-[10px] border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--text)] outline-none transition focus:border-[var(--accent)] focus:ring-3 focus:ring-[var(--accent-soft)]"
+            >
+
+            <p
+              class="mt-1.5 text-[11px] text-[var(--faint)]"
+            >
+              Use a publicly accessible image URL. Leaving this empty falls back
+              to your Matrix avatar when one is connected.
+            </p>
+          </label>
+
+          <div
+            v-if="matrixAvatarUrl"
+            class="mt-5 border-t border-[var(--border)] pt-5"
+          >
+            <p class="text-[12px] text-[var(--muted)]">
+              Matrix Directory stores an encrypted Matrix token so it can load
+              your avatar. Disconnecting deletes that token.
+            </p>
+
+            <button
+              type="button"
+              :disabled="disconnecting"
+              class="mt-3 cursor-pointer rounded-[8px] border border-[var(--danger-border)] bg-[var(--surface)] px-3 py-1.5 text-[12px] font-medium text-[var(--danger)] transition hover:bg-[var(--danger-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+              @click="disconnectMatrix"
+            >
+              {{ disconnecting ? 'Disconnecting…' : 'Disconnect Matrix avatar' }}
+            </button>
+          </div>
+        </section>
+
         <!-- Links -->
         <section
           class="border-t border-[var(--border)] p-6"
@@ -434,29 +554,7 @@ onBeforeUnmount(() => {
             </h2>
           </div>
 
-          <div class="mt-6 space-y-5">
-            <label class="block">
-              <span
-                class="text-[13px] font-medium text-[var(--text)]"
-              >
-                Avatar
-              </span>
-
-              <input
-                v-model="form.avatar_url"
-                type="url"
-                maxlength="500"
-                placeholder="https://example.com/avatar.png"
-                class="mt-2 w-full rounded-[10px] border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--text)] outline-none transition focus:border-[var(--accent)] focus:ring-3 focus:ring-[var(--accent-soft)]"
-              >
-
-              <p
-                class="mt-1.5 text-[11px] text-[var(--faint)]"
-              >
-                Use a publicly accessible image URL.
-              </p>
-            </label>
-
+          <div class="mt-6">
             <div class="grid gap-5 sm:grid-cols-2">
               <label>
                 <span

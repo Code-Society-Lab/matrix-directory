@@ -16,9 +16,14 @@ interface Profile {
   website_url: string | null
 }
 
+export interface OwnProfile extends Profile {
+  custom_avatar_url: string | null
+  matrix_avatar_url: string | null
+}
+
 export interface CurrentUser {
   id: string
-  profile: Profile | null
+  profile: OwnProfile | null
 }
 
 export interface ProfileUpdate {
@@ -112,9 +117,15 @@ export function getCurrentUser() {
 }
 
 export function updateMyProfile(profile: ProfileUpdate) {
-  return request<Profile>('/profile/me', {
+  return request<OwnProfile>('/profile/me', {
     method: 'PUT',
     body: JSON.stringify(profile),
+  })
+}
+
+export function disconnectMatrixAvatar() {
+  return request<OwnProfile>('/profile/me/matrix-avatar', {
+    method: 'DELETE',
   })
 }
 

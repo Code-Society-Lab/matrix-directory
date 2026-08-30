@@ -61,7 +61,7 @@ Application errors use a JSON `detail` field:
 | `401 Unauthorized` | The session cookie is missing, invalid, or expired |
 | `404 Not Found` | The resource is missing or unavailable to its current user |
 | `422 Unprocessable Content` | The request body or path parameters are invalid |
-| `503 Service Unavailable` | Matrix login has not been configured |
+| `503 Service Unavailable` | Matrix login or media proxying has not been configured |
 
 Validation errors contain FastAPI's structured list of field errors rather than
 a single string.
@@ -222,24 +222,71 @@ identity model and complete login flow.
 
 | Method | Path | Access | Success | Description |
 | --- | --- | --- | --- | --- |
+| `GET` | `/api/profiles/{user_id}` | Public | `200 OK` | Get a public profile and its published projects |
+| `GET` | `/api/profiles/{user_id}/avatar` | Public | `200 OK` | Stream the user's Matrix avatar thumbnail |
 | `PUT` | `/api/profile/me` | Authenticated | `200 OK` | Replace the current user's public profile |
+| `DELETE` | `/api/profile/me/matrix-avatar` | Authenticated | `200 OK` | Stop using the Matrix avatar and delete its stored credential |
+
+### Update the current profile
 
 The profile body accepts these nullable fields:
 
 ```json
 {
-  "matrix_id": "@maintainer:example.org",
   "display_name": "Example Maintainer",
   "bio": "Maintains useful Matrix projects.",
-  "avatar_url": null,
+  "avatar_url": "https://example.org/me.png",
   "github_url": "https://github.com/example",
   "website_url": null
 }
 ```
 
 Because this is a `PUT` endpoint, omitted fields are stored as `null`.
-Changing `matrix_id` clears any existing verification. Clients cannot set
-`matrix_id_verified`.
+
+`matrix_id` and `matrix_id_verified` are server-managed. They are resolved from
+the homeserver during login and are rejected in a request body with `422`.
+
+URL fields must be absolute `http://` or `https://` URLs, matching the rule
+projects use.
+
+### Avatar fields
+
+A profile carries two avatar values, and public responses expose only the
+resolved one:
+
+| Field | Audience | Meaning |
+| --- | --- | --- |
+| `avatar_url` | Public | The image to display: the custom one when set, otherwise the Matrix avatar |
+| `custom_avatar_url` | Owner | The image the user chose, independent of Matrix |
+| `matrix_avatar_url` | Owner | Present when a Matrix avatar can be served through the proxy |
+
+Clearing `avatar_url` falls back to the Matrix avatar when one is connected.
+
+### Stream an avatar
+
+```http
+GET /api/profiles/{user_id}/avatar
+```
+
+The backend uses its own stored credential, so this endpoint needs no session.
+It responds with an image body, `Cache-Control: public, max-age=3600`, and
+`X-Content-Type-Options: nosniff`.
+
+| Status | Meaning |
+| --- | --- |
+| `200 OK` | The thumbnail is streamed from the homeserver |
+| `404 Not Found` | The user has no Matrix avatar this deployment can serve |
+| `503 Service Unavailable` | Matrix media proxying is not configured |
+
+### Disconnect the Matrix avatar
+
+```http
+DELETE /api/profile/me/matrix-avatar
+```
+
+Deletes the encrypted Matrix refresh token held for the current user and clears
+the stored avatar reference, returning the updated profile. Signing in again
+reconnects it.
 
 ## Related documentation
 

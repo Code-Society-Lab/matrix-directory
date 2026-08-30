@@ -122,7 +122,8 @@ Matrix login requires a public HTTPS callback. From the repository root, run:
 python scripts/dev_matrix_tunnel.py
 ```
 
-The helper registers a temporary OAuth client, starts a Cloudflare tunnel,
+The helper registers a temporary OAuth client, including the `refresh_token`
+grant needed for authenticated Matrix avatar thumbnails, starts a Cloudflare tunnel,
 updates the root `.env`, and launches Docker Compose. Keep it running while
 testing authentication.
 
