@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, model_validator
 
+from ..services.avatar import resolve_avatar_url
+
 
 class ProjectOwnerRead(BaseModel):
     """Public owner fields embedded in a project response."""
@@ -23,5 +25,7 @@ class ProjectOwnerRead(BaseModel):
             "id": value.id,
             "display_name": profile.display_name if profile is not None else None,
             "matrix_id": profile.matrix_id if profile is not None else None,
-            "avatar_url": profile.avatar_url if profile is not None else None,
+            "avatar_url": (
+                resolve_avatar_url(profile) if profile is not None else None
+            ),
         }

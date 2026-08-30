@@ -30,6 +30,7 @@ class Profile(Model, table=True):
         index=True,
     )
     matrix_id_verified: bool = Field(default=False)
+    matrix_avatar_mxc: str | None = Field(default=None, max_length=500)
 
     display_name: str | None = Field(default=None, max_length=100)
     bio: str | None = Field(default=None, max_length=1024)
