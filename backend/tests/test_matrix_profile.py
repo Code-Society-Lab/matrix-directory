@@ -32,6 +32,7 @@ def test_get_matrix_profile__uses_verified_encoded_user_id(
                 200,
                 json={
                     "displayname": "Penguin Boi",
+                    "avatar_url": "mxc://matrix.org/avatar",
                 },
                 request=httpx.Request("GET", url),
             )
@@ -46,4 +47,5 @@ def test_get_matrix_profile__uses_verified_encoded_user_id(
     )
 
     assert profile.displayname == "Penguin Boi"
+    assert profile.avatar_url == "mxc://matrix.org/avatar"
     assert request_headers == {"Accept": "application/json"}
