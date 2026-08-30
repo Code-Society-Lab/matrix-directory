@@ -2,11 +2,12 @@ import pytest
 from sqlmodel import Session, select
 
 from app.models.profile import Profile
+from app.services.avatar import resolve_avatar_url
 from app.services.auth.auth_service import (
     create_session,
+    get_matrix_refresh_token_encrypted,
     get_user_for_token,
 )
-
 from app.services.errors import (
     MatrixIdentityConflictError,
 )
@@ -61,6 +62,8 @@ def test_matrix_identity__expect_profile_verified_from_whoami_result(
         subject="subject",
         matrix_id="@owner:example.org",
         matrix_display_name="Matrix Owner",
+        matrix_avatar_mxc="mxc://example.org/avatar",
+        matrix_refresh_token_encrypted="encrypted-refresh-token",
     )
 
     user = get_user_for_token(session, token=token)
@@ -70,6 +73,17 @@ def test_matrix_identity__expect_profile_verified_from_whoami_result(
     assert user.profile.matrix_id == "@owner:example.org"
     assert user.profile.matrix_id_verified is True
     assert user.profile.display_name == "Matrix Owner"
+    # The proxy URL is derived on read, never persisted onto the profile.
+    assert user.profile.avatar_url is None
+    assert user.profile.matrix_avatar_mxc == "mxc://example.org/avatar"
+    assert resolve_avatar_url(user.profile) == f"/api/profiles/{user.id}/avatar"
+    assert (
+        get_matrix_refresh_token_encrypted(
+            session,
+            user_id=user.id,
+        )
+        == "encrypted-refresh-token"
+    )
 
 
 def test_matrix_profile__expect_existing_local_customizations_preserved(

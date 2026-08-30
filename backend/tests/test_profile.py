@@ -10,7 +10,7 @@ from app.models.project_type import ProjectType
 from app.models.user import User
 from app.routers.profile_router import get_public_profile, update_my_profile
 from app.schemas.auth import CurrentUserRead
-from app.schemas.profile import ProfileUpdate
+from app.schemas.profile import ProfileRead, ProfileUpdate
 from app.schemas.user import UserRead
 
 
@@ -143,3 +143,62 @@ def test_public_profile__exposes_profile_and_owned_projects_without_oidc_fields(
     assert [project.name for project in public_profile.projects] == ["Owner bot"]
     assert "oidc_issuer" not in public_profile.model_dump()
     assert "oidc_subject" not in public_profile.model_dump()
+
+
+def test_profile_update__rejects_a_non_http_url() -> None:
+    with pytest.raises(ValidationError):
+        ProfileUpdate.model_validate({"avatar_url": "javascript:alert(1)"})
+
+
+def test_profile_update__normalises_blank_urls_to_null() -> None:
+    profile = ProfileUpdate.model_validate(
+        {"github_url": "  ", "website_url": "https://example.org"}
+    )
+
+    assert profile.github_url is None
+    assert profile.website_url == "https://example.org"
+
+
+def test_profile_read__exposes_the_matrix_proxy_without_storing_it(
+    session: Session,
+) -> None:
+    user = User(oidc_issuer="issuer", oidc_subject="subject")
+    session.add(user)
+    session.flush()
+    profile = Profile(
+        user_id=user.id,
+        matrix_id="@owner:example.org",
+        matrix_avatar_mxc="mxc://example.org/avatar",
+    )
+    session.add(profile)
+    session.commit()
+
+    read = ProfileRead.model_validate(profile)
+
+    assert profile.avatar_url is None
+    assert read.custom_avatar_url is None
+    assert read.matrix_avatar_url == f"/api/profiles/{user.id}/avatar"
+    assert read.avatar_url == f"/api/profiles/{user.id}/avatar"
+    assert "matrix_avatar_mxc" not in read.model_dump()
+
+
+def test_profile_read__prefers_a_custom_avatar_over_the_matrix_one(
+    session: Session,
+) -> None:
+    user = User(oidc_issuer="issuer", oidc_subject="subject")
+    session.add(user)
+    session.flush()
+    profile = Profile(
+        user_id=user.id,
+        matrix_id="@owner:example.org",
+        matrix_avatar_mxc="mxc://example.org/avatar",
+        avatar_url="https://example.org/me.png",
+    )
+    session.add(profile)
+    session.commit()
+
+    read = ProfileRead.model_validate(profile)
+
+    assert read.avatar_url == "https://example.org/me.png"
+    assert read.custom_avatar_url == "https://example.org/me.png"
+    assert read.matrix_avatar_url == f"/api/profiles/{user.id}/avatar"
