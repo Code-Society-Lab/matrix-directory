@@ -27,6 +27,9 @@ services:
       MATRIX_OIDC_CLIENT_SECRET: ${MATRIX_OIDC_CLIENT_SECRET:-}
       MATRIX_OIDC_REDIRECT_URI: ${MATRIX_OIDC_REDIRECT_URI:-}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      MATRIX_HOMESERVER_URL: ${MATRIX_HOMESERVER_URL:-https://matrix.org}
+      MATRIX_OIDC_SCOPE: ${MATRIX_OIDC_SCOPE:-openid urn:matrix:client:api:*}
+      MATRIX_TOKEN_ENCRYPTION_KEY: ${MATRIX_TOKEN_ENCRYPTION_KEY:-}
     command: >
       sh -c "pelican up &&
              python -m app.seed &&
@@ -49,6 +52,7 @@ services:
       VITE_API_URL: /api
       VITE_API_PROXY_TARGET: http://api:8000
       VITE_DOCS_URL: ${VITE_DOCS_URL:-http://127.0.0.1:8001}
+      VITE_MATRIX_ACCOUNT_URL: ${MATRIX_ACCOUNT_URL:-https://account.matrix.org/account/}
     ports:
       - "5173:5173"
     volumes:

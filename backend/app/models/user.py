@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
 
@@ -6,13 +6,11 @@ from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, Relationship
 from sqlmodel_toolkit import Model
 
+from ..utils.datetime import utc_now
+
 if TYPE_CHECKING:
     from .profile import Profile
     from .project import Project
-
-
-def utc_now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class User(Model, table=True):

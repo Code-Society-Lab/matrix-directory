@@ -73,8 +73,21 @@ docker compose down -v
 Matrix Directory authenticates users through the Matrix Authentication Service
 (MAS) using OpenID Connect.
 
-Application accounts are identified by the OIDC `(issuer, subject)` pair rather
-than by a Matrix ID.
+Application accounts are identified by the OIDC `(issuer, subject)` pair. During
+login, the backend resolves the authoritative Matrix ID by calling the
+homeserver `/_matrix/client/v3/account/whoami` endpoint with the MAS access
+token.
+
+Matrix avatars use an authenticated backend thumbnail proxy. Set a stable
+`MATRIX_TOKEN_ENCRYPTION_KEY` (a Fernet key) before enabling Matrix login:
+
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+The backend encrypts the OAuth refresh token, then uses it only to stream the
+Matrix v1 thumbnail endpoint. Neither Matrix OAuth token is exposed to the
+browser.
 
 For local development with a real Matrix account, use the helper script to
 register an OAuth client and start an HTTPS tunnel:

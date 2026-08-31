@@ -7,7 +7,7 @@ import type {
 } from '../types/project'
 
 interface Profile {
-  matrix_id: string | null
+  matrix_id: string
   matrix_id_verified: boolean
   display_name: string | null
   bio: string | null
@@ -16,13 +16,17 @@ interface Profile {
   website_url: string | null
 }
 
+export interface OwnProfile extends Profile {
+  custom_avatar_url: string | null
+  matrix_avatar_url: string | null
+}
+
 export interface CurrentUser {
   id: string
-  profile: Profile | null
+  profile: OwnProfile | null
 }
 
 export interface ProfileUpdate {
-  matrix_id: string | null
   display_name: string | null
   bio: string | null
   avatar_url: string | null
@@ -30,7 +34,12 @@ export interface ProfileUpdate {
   website_url: string | null
 }
 
-export type ValidationIssue = {
+export interface PublicProfile extends Profile {
+  user_id: string | null
+  projects: ProjectListItem[]
+}
+
+type ValidationIssue = {
   loc: Array<string | number>
   msg: string
   type: string
@@ -108,10 +117,20 @@ export function getCurrentUser() {
 }
 
 export function updateMyProfile(profile: ProfileUpdate) {
-  return request<Profile>('/profile/me', {
+  return request<OwnProfile>('/profile/me', {
     method: 'PUT',
     body: JSON.stringify(profile),
   })
+}
+
+export function disconnectMatrixAvatar() {
+  return request<OwnProfile>('/profile/me/matrix-avatar', {
+    method: 'DELETE',
+  })
+}
+
+export function getPublicProfile(userId: string) {
+  return request<PublicProfile>(`/profiles/${userId}`)
 }
 
 export function logout() {

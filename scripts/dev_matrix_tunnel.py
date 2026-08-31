@@ -42,7 +42,7 @@ def register_client(base_url: str) -> dict:
         "client_name": "Matrix Directory (local)",
         "client_uri": base_url,
         "redirect_uris": [f"{base_url}/api/auth/matrix/callback"],
-        "grant_types": ["authorization_code"],
+        "grant_types": ["authorization_code", "refresh_token"],
         "response_types": ["code"],
         "token_endpoint_auth_method": "client_secret_basic",
     }

@@ -1,16 +1,14 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlmodel import Field, Relationship
 from sqlmodel_toolkit import Model
 
+from ..utils.datetime import utc_now
+
 if TYPE_CHECKING:
     from .user import User
-
-
-def utc_now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class Profile(Model, table=True):
@@ -27,13 +25,12 @@ class Profile(Model, table=True):
         nullable=False,
     )
 
-    matrix_id: str | None = Field(
-        default=None,
+    matrix_id: str = Field(
         unique=True,
         index=True,
-        max_length=255,
     )
     matrix_id_verified: bool = Field(default=False)
+    matrix_avatar_mxc: str | None = Field(default=None, max_length=500)
 
     display_name: str | None = Field(default=None, max_length=100)
     bio: str | None = Field(default=None, max_length=1024)

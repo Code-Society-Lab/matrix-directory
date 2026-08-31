@@ -15,6 +15,7 @@ import {
 
 import { currentUser, logout } from '../auth'
 
+import AvatarImage from './AvatarImage.vue'
 import BrandLogo from './BrandLogo.vue'
 
 const docsUrl =
@@ -50,25 +51,16 @@ onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', handleClickOutside)
 })
 
-const profileInitial = computed(() => {
-  const name =
-    currentUser.value?.profile?.display_name ||
-    currentUser.value?.profile?.matrix_id
-
-  if (!name) {
-    return 'P'
-  }
-
-  return name
-    .replace(/^@/, '')
-    .charAt(0)
-    .toUpperCase()
-})
-
 const profileLabel = computed(() =>
   currentUser.value?.profile?.display_name ||
   currentUser.value?.profile?.matrix_id ||
   'Profile',
+)
+
+const publicProfilePath = computed(() =>
+  currentUser.value
+    ? `/profiles/${currentUser.value.id}`
+    : '/login',
 )
 
 function isActive(path: string) {
@@ -155,22 +147,16 @@ watch(
         <!-- Signed in -->
         <template v-if="currentUser">
           <RouterLink
-            to="/profile"
+            :to="publicProfilePath"
             class="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 pr-3 no-underline transition hover:border-[var(--border-strong)]"
           >
             <div
               class="grid size-[28px] shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent-ink)]"
             >
-              <img
-                v-if="currentUser.profile?.avatar_url"
-                :src="currentUser.profile.avatar_url"
-                alt=""
-                class="size-full object-cover"
-              >
-
-              <span v-else>
-                {{ profileInitial }}
-              </span>
+              <AvatarImage
+                :src="currentUser.profile?.avatar_url"
+                :name="profileLabel"
+              />
             </div>
 
             <span
@@ -233,22 +219,16 @@ watch(
           <!-- User -->
           <RouterLink
             v-if="currentUser"
-            to="/profile"
+            :to="publicProfilePath"
             class="flex items-center gap-3 border-b border-[var(--border)] px-4 py-4 no-underline"
           >
             <div
               class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--accent-soft)] text-sm font-semibold text-[var(--accent-ink)]"
             >
-              <img
-                v-if="currentUser.profile?.avatar_url"
-                :src="currentUser.profile.avatar_url"
-                alt=""
-                class="size-full object-cover"
-              >
-
-              <span v-else>
-                {{ profileInitial }}
-              </span>
+              <AvatarImage
+                :src="currentUser.profile?.avatar_url"
+                :name="profileLabel"
+              />
             </div>
 
             <div class="min-w-0">
@@ -299,15 +279,28 @@ watch(
 
             <RouterLink
               v-if="currentUser"
-              to="/profile"
+              :to="publicProfilePath"
               class="flex rounded-[8px] px-3 py-2.5 text-sm no-underline transition"
               :class="
-                isActive('/profile')
+                route.path === publicProfilePath
                   ? 'bg-[var(--sunk)] font-medium text-[var(--text)]'
                   : 'text-[var(--muted)] hover:bg-[var(--sunk)] hover:text-[var(--text)]'
               "
             >
               Profile
+            </RouterLink>
+
+            <RouterLink
+              v-if="currentUser"
+              to="/account/profile"
+              class="flex rounded-[8px] px-3 py-2.5 text-sm no-underline transition"
+              :class="
+                isActive('/account')
+                  ? 'bg-[var(--sunk)] font-medium text-[var(--text)]'
+                  : 'text-[var(--muted)] hover:bg-[var(--sunk)] hover:text-[var(--text)]'
+              "
+            >
+              Account settings
             </RouterLink>
 
             <a

@@ -72,7 +72,7 @@ onMounted(loadProject)
         class="inline-flex items-center gap-2 font-mono text-[12px] text-[var(--muted)] no-underline transition hover:text-[var(--text)]"
       >
         <ArrowLeftIcon class="size-3.5" />
-        back to directory
+        Directory
       </RouterLink>
 
       <!-- Hero -->
@@ -261,11 +261,13 @@ onMounted(loadProject)
               Owner
             </span>
 
-            <span
-              class="max-w-[170px] break-all text-right font-mono text-[12px] text-[var(--text)]"
+            <RouterLink
+              :to="`/profiles/${project.owner.id}`"
+              title="See owner's profile"
+              class="max-w-[170px] break-all text-right font-mono text-[12px] text-[var(--accent-ink)] no-underline hover:underline"
             >
               {{ project.owner.display_name ?? project.owner.matrix_id ?? 'Not listed' }}
-            </span>
+            </RouterLink>
           </div>
 
           <!-- Project type -->
