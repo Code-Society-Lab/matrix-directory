@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 
 import type { ProjectListItem } from '../types/project'
 import { projectPath } from '../utils/projectRoutes'
+import AvatarImage from './AvatarImage.vue'
 
 const props = defineProps<{
   project: ProjectListItem
@@ -15,15 +16,8 @@ const extraLabelCount = computed(() =>
   Math.max(props.project.labels.length - 1, 0),
 )
 
-const ownerInitial = computed(() =>
-  (
-    props.project.owner?.display_name ||
-    props.project.owner?.matrix_id ||
-    '?'
-  )
-    .replace(/^@/, '')
-    .charAt(0)
-    .toUpperCase(),
+const ownerName = computed(
+  () => props.project.owner?.display_name || props.project.owner?.matrix_id,
 )
 </script>
 
@@ -85,16 +79,10 @@ const ownerInitial = computed(() =>
               text-[var(--accent-ink)]
             "
           >
-            <img
-              v-if="project.owner.avatar_url"
+            <AvatarImage
               :src="project.owner.avatar_url"
-              alt=""
-              class="size-full object-cover"
-            >
-
-            <span v-else>
-              {{ ownerInitial }}
-            </span>
+              :name="ownerName"
+            />
           </div>
 
           <span

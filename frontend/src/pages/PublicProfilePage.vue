@@ -16,6 +16,7 @@ import {
   getPublicProfile,
   type PublicProfile,
 } from '../api/client'
+import AvatarImage from '../components/AvatarImage.vue'
 import MarkdownContent from '../components/markdown/MarkdownContent.vue'
 import { projectPath } from '../utils/projectRoutes'
 import { createReportProfileEmail } from '../email/reportProfile'
@@ -31,15 +32,6 @@ const displayName = computed(
     profile.value?.display_name ||
     profile.value?.matrix_id ||
     'Directory member',
-)
-
-const initials = computed(() =>
-  displayName.value
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase(),
 )
 
 const bio = computed(() => profile.value?.bio ?? '')
@@ -130,16 +122,10 @@ onMounted(loadProfile)
              bg-[var(--accent-soft)] font-display text-xl font-semibold
              text-[var(--accent-ink)] sm:size-24 sm:rounded-[20px]"
             >
-              <img
-                v-if="profile.avatar_url"
+              <AvatarImage
                 :src="profile.avatar_url"
-                alt=""
-                class="size-full object-cover"
-              >
-
-              <span v-else>
-                {{ initials }}
-              </span>
+                :name="displayName"
+              />
             </div>
 
             <div class="flex min-w-0 flex-1 items-start gap-3">

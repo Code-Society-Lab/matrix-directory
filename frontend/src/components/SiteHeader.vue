@@ -15,6 +15,7 @@ import {
 
 import { currentUser, logout } from '../auth'
 
+import AvatarImage from './AvatarImage.vue'
 import BrandLogo from './BrandLogo.vue'
 
 const docsUrl =
@@ -48,21 +49,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', handleClickOutside)
-})
-
-const profileInitial = computed(() => {
-  const name =
-    currentUser.value?.profile?.display_name ||
-    currentUser.value?.profile?.matrix_id
-
-  if (!name) {
-    return 'P'
-  }
-
-  return name
-    .replace(/^@/, '')
-    .charAt(0)
-    .toUpperCase()
 })
 
 const profileLabel = computed(() =>
@@ -167,16 +153,10 @@ watch(
             <div
               class="grid size-[28px] shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent-ink)]"
             >
-              <img
-                v-if="currentUser.profile?.avatar_url"
-                :src="currentUser.profile.avatar_url"
-                alt=""
-                class="size-full object-cover"
-              >
-
-              <span v-else>
-                {{ profileInitial }}
-              </span>
+              <AvatarImage
+                :src="currentUser.profile?.avatar_url"
+                :name="profileLabel"
+              />
             </div>
 
             <span
@@ -245,16 +225,10 @@ watch(
             <div
               class="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--accent-soft)] text-sm font-semibold text-[var(--accent-ink)]"
             >
-              <img
-                v-if="currentUser.profile?.avatar_url"
-                :src="currentUser.profile.avatar_url"
-                alt=""
-                class="size-full object-cover"
-              >
-
-              <span v-else>
-                {{ profileInitial }}
-              </span>
+              <AvatarImage
+                :src="currentUser.profile?.avatar_url"
+                :name="profileLabel"
+              />
             </div>
 
             <div class="min-w-0">
